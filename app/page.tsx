@@ -1,8 +1,10 @@
 "use client"
 
+import { handleSignin, handleSignup } from "@/lib/auth";
 import { AtSign, Eye, EyeOff, Lock, LockIcon, LockKeyhole, Mail, Plane, PlaneIcon } from "lucide-react";
+import { redirect } from "next/navigation";
 import React, { useState } from "react";
-import { handleSignin, handleSignup } from "./actions";
+import { toast } from "sonner";
 
 export interface LoginType {
   email: string;
@@ -32,23 +34,28 @@ export default function Home() {
     if(loginOpen) {
       const res = await handleSignin(formData)
 
-      if (res.success && res.token) {
-        localStorage.setItem("token", res.token)
-        alert("You have signed in successfully")
+      if (res.success && res.role) {
+        toast.success("Sign in successfully")
+        if(res.role == "STUDENT"){
+          redirect("/student-dashboard")
+        }
+        else if(res.role == "ADMIN"){
+          redirect("/admin-dashboard")
+        }
       }
       else {
-        alert("Invalid credentials")
+        toast.error("Invalid credentials")
       }
     }
     else {
       const res = await handleSignup(formData)
 
       if (res.success) {
-        alert("You have signed up successfully")
+        toast.success("Sign up successfully")
         setLoginOpen(true)
       }
       else {
-        alert("Error signing up")
+        toast.error("Error signing up")
       }
     }
   }
@@ -56,8 +63,8 @@ export default function Home() {
   return (
     <div className="w-screen h-screen flex justify-center ">
       <div className="flex flex-col justify-center px-4 w-lg">
-        <div className="flex flex-col bg-purple-50 rounded-xl shadow-lg px-8 py-4 items-center">
-          <PlaneIcon className="w-15 h-15 bg-purple-300 p-1 rounded-full text-purple-600 border border-purple-400 mb-2"/>
+        <div className="flex flex-col bg-blue-50 rounded-xl shadow-lg px-8 py-4 items-center">
+          <PlaneIcon className="w-15 h-15 bg-blue-200 p-1 rounded-full text-blue-400 border border-blue-400 mb-2"/>
           <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight School {loginOpen ? "Login" : "Sign Up"}</h1>
           <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
           <form
@@ -71,8 +78,8 @@ export default function Home() {
               >
                 Email
               </label>
-              <div className="bg-purple-100 border border-purple-300 rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-purple-500">
-                <AtSign className="text-purple-400" />
+              <div className="bg-blue-100 border border-blue-300 rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
+                <AtSign className="text-blue-400" />
                 <input
                   onChange={handleInputChange}
                   value={formData.email}
@@ -89,11 +96,11 @@ export default function Home() {
               >
                 Password
               </label>
-              <div className="bg-purple-100 border-purple-300 border rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-purple-500">
+              <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
                 { showPassword ?
-                <EyeOff onClick = {() => setShowPassword(false)} className="text-purple-400"/>
+                <EyeOff onClick = {() => setShowPassword(false)} className="text-blue-400"/>
                 :
-                <Eye onClick = {() => setShowPassword(true)} className="text-purple-400"/>
+                <Eye onClick = {() => setShowPassword(true)} className="text-blue-400"/>
                 }
                 <input 
                   onChange = {(e) => handleInputChange(e)}
@@ -115,7 +122,7 @@ export default function Home() {
                   >
                     First Name
                   </label>
-                  <div className="bg-purple-100 border-purple-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-purple-500">
+                  <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
                     <input 
                       onChange = {(e) => handleInputChange(e)}
                       value={formData.firstName}
@@ -132,7 +139,7 @@ export default function Home() {
                   >
                     Last Name
                   </label>
-                  <div className="bg-purple-100 border-purple-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-purple-500">
+                  <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
                     <input 
                       onChange = {(e) => handleInputChange(e)}
                       value={formData.lastName}
@@ -148,7 +155,7 @@ export default function Home() {
             <div className="flex flex-col justify-center mb-4">
               <button 
                 type="submit"
-                className="bg-purple-500 text-white px-2 py-1 rounded cursor-pointer h-10 hover:bg-purple-600"
+                className="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer h-10 hover:bg-blue-600"
               >
                 {loginOpen ? "Login" : "Sign Up"}
               </button>
@@ -157,12 +164,12 @@ export default function Home() {
             loginOpen ?
             <p className="text-gray-800 flex gap-1 justify-center">
               Dont have an account? 
-              <button type = "button" onClick = {() => setLoginOpen(false)} className="text-purple-500 cursor-pointer">
+              <button type = "button" onClick = {() => setLoginOpen(false)} className="text-blue-400 cursor-pointer">
                 Sign up here
               </button>
             </p>
             :
-              <button type = "button" onClick = {() => setLoginOpen(true)} className="text-purple-500 cursor-pointer flex justify-center w-full">
+              <button type = "button" onClick = {() => setLoginOpen(true)} className="text-blue-400 cursor-pointer flex justify-center w-full">
                 Back to sign in
               </button>
             }
