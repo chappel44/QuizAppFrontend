@@ -1,7 +1,3 @@
-export interface Sections {
-  sections: Section[]
-}
-
 export interface Section {
   id: string;
   name: string;
@@ -13,4 +9,7 @@ export interface Topic {
   id: string;
   name: string;
   description: string;
+  createdAt: string;
+  dueDate: string;
+  isActive: boolean;
 }

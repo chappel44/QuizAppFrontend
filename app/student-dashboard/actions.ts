@@ -1,10 +1,10 @@
 "use server"
 import { cookies } from 'next/headers';
-import { Section, Sections, Topic } from './types';
+import { Section, Topic } from './types';
 
 interface GetSectionOverviewResponse {
   success: Boolean;
-  sections: Sections | undefined;
+  sections: Section[] | undefined;
 }
 
 export async function GetSectionOverview(): Promise<GetSectionOverviewResponse>{
