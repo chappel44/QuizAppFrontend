@@ -4,13 +4,20 @@ import { ArrowLeft } from "lucide-react";
 import { Topic } from "../types";
 import { Attempt } from "./types"
 import { redirect } from "next/navigation";
+import { createAttempt } from "./actions";
 
 interface AttemptLayoutProps {
   attempts: Attempt[];
   topic: Topic;
 }
 
-export default function AttemptLayout({attempts, topic}: AttemptLayoutProps){
+export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
+  const handleCreateAttempt = async () => {
+    const attemptId = await createAttempt(topic.id)
+
+    redirect(`/student-dashboard/attempts/${attemptId}`)
+  }
+
   return (
   <div className="px-4">
     <h1 className="flex w-full justify-center pt-20 text-4xl font-bold text-white">
@@ -19,10 +26,6 @@ export default function AttemptLayout({attempts, topic}: AttemptLayoutProps){
 
     <div className="mx-auto mt-6 flex w-full max-w-3xl flex-col">
       <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl">
-        {/*<p className="text-sm text-gray-600"> <span className="text-xl text-black/70 font-semibold">Name:</span> {topic.description}</p>
-        <p className="text-sm text-gray-600">
-          Description: {topic.description}
-        </p>*/}
         <button 
         onClick={() => {
             redirect("/student-dashboard")
@@ -58,16 +61,17 @@ export default function AttemptLayout({attempts, topic}: AttemptLayoutProps){
 
                     <div className="rounded bg-gray-100 px-3 py-2 text-sm">
                       <span className="font-semibold">Percentage:</span>{" "}
-                      {attempt.percentage}%
+                      {attempt.percentage * 100}%
                     </div>
                   </div>
 
-                  <button
+                  <a
+                    href={`/student-dashboard/attempts/${attempt.id}`}
                     type="button"
                     className="ml-4 rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
                   >
                     Continue Attempt
-                  </button>
+                  </a>
                 </div>
               ))}
             </>
@@ -78,6 +82,7 @@ export default function AttemptLayout({attempts, topic}: AttemptLayoutProps){
           <button
             type="button"
             className="rounded bg-blue-500 px-5 py-2 font-medium text-white hover:bg-blue-600"
+            onClick={handleCreateAttempt}
           >
             Start New Attempt
           </button>
