@@ -49,7 +49,8 @@ export async function getAttempt(attemptId: string) {
   );
 
   if (!res.ok) { 
-    throw new Error("Failed to fetch attempts"); 
+    console.error("Failed to fetch attempts");
+    redirect("/student-dashboard")
   }
 
   const body = await res.json();
@@ -120,4 +121,22 @@ export async function createAttempt(topicId: string) {
   const resJson = await res.json();
 
   return resJson.data
+}
+
+export async function gradeAttempt(attemptId: string, topicId: string) {
+const cookieStore = await cookies(); 
+  const token = cookieStore.get("token")?.value; 
+  if (!token) {
+    redirect("/"); 
+  }
+  await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/student/attempt/test/grade?attemptId=${attemptId}`, { 
+    headers: 
+      { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      method: "PATCH",
+    },
+  );
+  redirect(`/student-dashboard/attempts?topicId=${topicId}`)
 }

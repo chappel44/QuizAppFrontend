@@ -1,6 +1,6 @@
 export interface AttemptQuestion {
   id: string;
-  isCorrect: Boolean;
+  isCorrect: boolean | null;
   submittedAnswerId: string;
   question: Question
 }
