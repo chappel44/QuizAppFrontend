@@ -108,7 +108,6 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
       [questionId]: answerId
     }))
   }
-
   useEffect(() => {
     setAttemptQuestions(attemptQuestionsTemp)
     setAttempt(attemptTemp)
@@ -154,7 +153,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
             {activeQuestion + 1}. {attemptQuestions[activeQuestion]?.question?.question}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {attemptQuestions[activeQuestion].question.answers.map((answer: Answer) => {
+          {attemptQuestions[activeQuestion]?.question.answers.map((answer: Answer) => {
             const currentQuestion = attemptQuestions[activeQuestion];
 
             const isSelected =
