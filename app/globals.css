@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
+/* 1. Register the three color stops so CSS knows how to transition them */
+@property --bg-start {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff; /* Light mode default start */
+}
+
+@property --bg-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f0f0f0; /* Light mode default middle */
+}
+
+@property --bg-end {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e0e0e0; /* Light mode default end */
+}
+
+/* 2. Standard Light Mode Defaults & Setup */
 :root {
-  --background: #690909;
-  --foreground: #fa0606;
+  /* Construct the static gradient template using the animatable variables */
+  --bg-gradient: linear-gradient(270deg, var(--bg-start), var(--bg-mid), var(--bg-end));
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+body {
+  background: var(--bg-gradient);
+  
+  /* Apply the transition directly to the underlying registered custom properties */
+  transition: 
+    --bg-start 0.8s ease-in-out, 
+    --bg-mid 0.8s ease-in-out, 
+    --bg-end 0.8s ease-in-out;
+    
+  min-height: 100vh;
 }
 
+/* 3. Dark Mode Triggers updated color tokens smoothly */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #61bce0de;
-    --foreground: #0066ff;
+    --bg-start: #4a9fd4;  
+    --bg-mid:   #67c3fc;  
+    --bg-end:   #3a6fd0;  
   }
 }
 
 body {
-  background: var(--background);
+  background: var(--bg-gradient);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

@@ -108,54 +108,131 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
       [questionId]: answerId
     }))
   }
-  useEffect(() => {
-    setAttemptQuestions(attemptQuestionsTemp)
-    setAttempt(attemptTemp)
-    const submittedAnswers: Record<string, string | null> = {};
 
-    attemptQuestionsTemp.forEach((attemptQ: AttemptQuestion) => {
-      submittedAnswers[attemptQ.id] = attemptQ.submittedAnswerId || null;
-    });
+  const DisplayChoices = () => {
+    const currentQuestion = attemptQuestions[activeQuestion];
 
-    setPreviouslySubmittedAnswerIds(submittedAnswers);
-  }, [])
+    if (!currentQuestion?.question) {
+      let pointsEarned = 0
+      let correctCount = 0
+      let unanswered = 0
+      let incorrect = 0
+      let totalPoints = 0
 
-  const leftArrowDisabled = activeQuestion - 1 < 0
-  const rightArrowDisabled = attemptQuestions && activeQuestion + 1 >= attemptQuestions.length;
+      attemptQuestions.forEach((attemptQuestion: AttemptQuestion) => {
+        if(!attemptQuestion.id) return //Exclude the dummy
+        totalPoints += attemptQuestion.question.points
 
-  return(
-    <div className="px-4 w-full justify-center items-center">
-      <div className="mx-auto flex w-full max-w-3xl flex-col justify-center h-screen">
-        { attemptQuestions && 
-        <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl space-y-8">
-          <button 
-            onClick={() => {
-                redirect(`/student-dashboard/attempts?topicId=${topicId}`)
-            }}
-            className="flex items-center text-blue-500 gap-1 cursor-pointer hover:text-blue-700"
-          >
-              <ArrowLeft className="w-8 h-8"/> Back to topic
-          </button>
-          <div className="flex items-center gap-3 w-full max-w-md mx-auto px-4">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full w-16 h-8 flex items-center justify-center border border-blue-300 shadow-md font-semibold text-sm shrink-0">
-              {activeQuestion + 1} / {attemptQuestions.length}
+        switch (attemptQuestion.isCorrect) {
+          case true: 
+            console.log("ADDING TO ATTEMPT POINTS")
+            pointsEarned += attemptQuestion.question.points
+            correctCount ++
+            break
+          case false: 
+            console.log("INCREMENTING INCRORECT")
+            incorrect += 1
+            break
+          case null:
+            console.log("ADD TO UNANSWERED")
+            unanswered += 1
+            break          
+        }
+      })
+
+      const totalQuestions = attemptQuestions.length-1;
+      const percentage =
+        totalPoints > 0 ? (pointsEarned / totalPoints) * 100 : 0;
+
+      return (
+        <div className="flex w-full flex-col items-center">
+          <h2 className="text-3xl font-bold text-gray-800">
+            Quiz Complete!
+          </h2>
+
+          <p className="mt-2 text-gray-600">
+            Here's how you did.
+          </p>
+
+          {/* Score */}
+          <div className="mt-4 flex flex-col items-center rounded-2xl bg-blue-50 px-12 py-8 shadow-lg">
+            <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              Your Score
+            </p>
+
+            <p className="mt-2 text-5xl font-bold text-blue-700">
+              {percentage.toFixed(1)}%
+            </p>
+
+            <p className="mt-2 text-gray-600">
+              {pointsEarned} / {totalPoints} points
+            </p>
+          </div>
+
+          {/* Statistics */}
+          <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Correct */}
+            <div className="flex flex-col items-center rounded-xl border border-green-300 bg-green-50 p-5">
+              <p className="text-sm font-semibold text-green-700">
+                Correct
+              </p>
+
+              <p className="mt-1 text-3xl font-bold text-green-800">
+                {correctCount}
+              </p>
+
+              <p className="text-sm text-green-700">
+                questions
+              </p>
             </div>
-            <div className="flex-1">
-              <div className="bg-blue-100 h-4 border border-blue-300 rounded-full overflow-hidden shadow-inner">
-                <div
-                  className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full transition-all duration-300 shadow-sm"
-                  style={{ width: `${Math.min(100, ((activeQuestion+1) / attemptQuestions.length) * 100)}%` }}
-                />
-              </div>
+
+            {/* Incorrect */}
+            <div className="flex flex-col items-center rounded-xl border border-red-300 bg-red-50 p-5">
+              <p className="text-sm font-semibold text-red-700">
+                Incorrect
+              </p>
+
+              <p className="mt-1 text-3xl font-bold text-red-800">
+                {incorrect}
+              </p>
+
+              <p className="text-sm text-red-700">
+                questions
+              </p>
+            </div>
+
+            {/* Unanswered */}
+            <div className="flex flex-col items-center rounded-xl border border-gray-300 bg-gray-50 p-5">
+              <p className="text-sm font-semibold text-gray-600">
+                Unanswered
+              </p>
+
+              <p className="mt-1 text-3xl font-bold text-gray-700">
+                {unanswered}
+              </p>
+
+              <p className="text-sm text-gray-600">
+                questions
+              </p>
             </div>
           </div>
-          <p className="text-xl font-semibold ">
-            {activeQuestion + 1}. {attemptQuestions[activeQuestion]?.question?.question}
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {attemptQuestions[activeQuestion]?.question.answers.map((answer: Answer) => {
-            const currentQuestion = attemptQuestions[activeQuestion];
 
+          {/* Question count */}
+          <div className="mt-6 text-sm text-gray-500">
+            {totalQuestions} total questions
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <p className="text-xl font-semibold">
+          {activeQuestion + 1}. {currentQuestion.question.question}
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {currentQuestion.question.answers?.map((answer: Answer) => {
             const isSelected =
               currentQuestion.submittedAnswerId === answer.id;
 
@@ -214,7 +291,65 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
               </button>
             );
           })}
+        </div>
+      </>
+    );
+  };
+
+  useEffect(() => {
+    setAttemptQuestions([...attemptQuestionsTemp,
+      { //Create this dummy which is used to show final progress
+        id: "",
+        isCorrect: null,
+        submittedAnswerId: "",
+      } as AttemptQuestion
+    ])
+
+    setAttempt(attemptTemp)
+    const submittedAnswers: Record<string, string | null> = {};
+
+    attemptQuestionsTemp.forEach((attemptQ: AttemptQuestion) => {
+      submittedAnswers[attemptQ.id] = attemptQ.submittedAnswerId || null;
+    });
+
+    setPreviouslySubmittedAnswerIds(submittedAnswers);
+  }, [])
+
+  const leftArrowDisabled = activeQuestion - 1 < 0
+  const rightArrowDisabled = attemptQuestions && activeQuestion + 1 >= attemptQuestions.length;
+
+  return(
+    <div className="px-4 w-full justify-center items-center">
+      <div className="mx-auto flex w-full max-w-3xl flex-col justify-center h-screen">
+      { attemptQuestions && 
+        <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl space-y-8">
+          <button 
+            onClick={() => {
+                redirect(`/student-dashboard/attempts?topicId=${topicId}`)
+            }}
+            className="flex items-center text-blue-500 gap-1 cursor-pointer hover:text-blue-700"
+          >
+              <ArrowLeft className="w-8 h-8"/> Back to topic
+          </button>
+          
+          {/* Progress bar section */}
+          <div className="flex items-center gap-3 w-full max-w-md mx-auto px-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full w-16 h-8 flex items-center justify-center border border-blue-300 shadow-md font-semibold text-sm shrink-0">
+              {activeQuestion + 1 >= attemptQuestions.length ? activeQuestion : activeQuestion+1} / {attemptQuestions.length - 1}
+            </div>
+            <div className="flex-1">
+              <div className="bg-blue-100 h-4 border border-blue-300 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full transition-all duration-300 shadow-sm"
+                  style={{ width: `${Math.min(100, ((activeQuestion+1) / (attemptQuestions.length - 1)) * 100)}%` }}
+                />
+              </div>
+            </div>
           </div>
+          
+          
+          {/* Answer Display */}
+          <DisplayChoices />
           <div className="w-full justify-between flex">
             <button 
               className={leftArrowDisabled ? "invisible" : `rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2`}
@@ -225,7 +360,12 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
             </button>
             <button 
               className={`rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2`}
-              onClick={() => handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId)}
+              onClick={() => {
+                if(activeQuestion+1 === attemptQuestions.length)
+                  redirect(`/student-dashboard/attempts?topicId=${topicId}`)
+                
+                handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId)
+              }}
             >
               {activeQuestion+1 === attemptQuestions.length ? "Finish" : <div className="flex gap-2 items-center">Next <ArrowRight /></div>}
             </button>

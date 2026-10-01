@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Hash, Heart, Trophy } from "lucide-react";
 import { Topic } from "../types";
 import { Attempt } from "./types"
 import { redirect } from "next/navigation";
@@ -14,17 +14,23 @@ interface AttemptLayoutProps {
 export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
   const handleCreateAttempt = async () => {
     const attemptId = await createAttempt(topic.id)
-
     redirect(`/student-dashboard/attempts/${attemptId}`)
   }
 
-  return (
-  <div className="px-4">
-    <h1 className="flex w-full justify-center pt-20 text-4xl font-bold text-white">
-      Name: {topic.name}
-    </h1>
+  let greatestScore = -1
+  attempts.map((attempt: Attempt) => {
+    if (attempt.percentage > greatestScore) {
+      greatestScore = attempt.percentage
+    }
+  })
 
-    <div className="mx-auto mt-6 flex w-full max-w-3xl flex-col">
+  return (
+  <div className="px-4 py-8">
+    {/*<h1 className="flex w-full justify-center pt-20 text-4xl font-bold text-white">
+      Name: {topic.name}
+    </h1>*/}
+
+    <div className="mx-auto flex w-full max-w-3xl flex-col">
       <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl">
         <button 
         onClick={() => {
@@ -34,6 +40,37 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
         >
           <ArrowLeft className="w-8 h-8"/> Back to Dashboard
         </button>
+
+        <div className="py-5 border-b border-blue-200 flex max-w-sm justify-between mx-auto">
+          <div
+            className={`flex flex-col items-center p-2 rounded-xl border ${
+              greatestScore === -1
+                ? "bg-gray-200 border-gray-400 text-gray-800"
+                : greatestScore * 100 < 65
+                ? "bg-red-200 border-red-400 text-red-800"
+                : greatestScore * 100 < 80
+                ? "bg-yellow-200 border-yellow-400 text-yellow-800"
+                : greatestScore * 100 < 90
+                ? "bg-blue-200 border-blue-400 text-blue-800"
+                : "bg-green-200 border-green-400 text-green-800"
+            }`}
+          >
+            <Trophy />
+            <p className="font-semibold">Best Score</p>
+            <p className="font-semibold">
+              {greatestScore === -1
+                ? "N/A"
+                : `${(greatestScore * 100).toFixed(2)}%`}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center bg-blue-200 p-2 rounded-xl text-blue-800 border border-blue-400">
+            <Hash className="text-blue-700" />
+            <p className="font-semibold">Attempts</p>
+            <p className="font-semibold">{attempts.length}</p>
+          </div>
+        </div>
+
         <h2 className="mt-6 mb-3 text-sm font-semibold uppercase tracking-wide text-gray-700">
           Attempts
         </h2>
@@ -47,7 +84,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
               {attempts.map((attempt, index) => (
                 <div
                   key={attempt.id}
-                  className="flex items-center justify-between rounded-lg border border-blue-300 bg-white px-4 py-4 shadow-sm"
+                  className="flex md:flex-row flex-col md:space-y-0 space-y-4 items-center justify-between rounded-lg border border-blue-300 bg-white px-4 py-4 shadow-sm"
                 >
                   <div className="flex flex-1 items-center gap-3">
                     <div className="rounded bg-blue-500 px-3 py-2 text-sm font-semibold text-white">
