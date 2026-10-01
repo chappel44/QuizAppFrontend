@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import { Attempt } from "../types";
 import { Answer, AttemptQuestion, Question } from "./types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { getAttempt, gradeAttempt, submitAnswer } from "../actions";
+import { gradeAttempt, submitAnswer } from "../actions";
 import { toast } from "sonner";
 import { redirect, useSearchParams } from "next/navigation";
-import { SearchParams } from "next/dist/server/request/search-params";
-import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
-import { refresh } from "next/cache";
 import { Topic } from "../../types";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { ConfirmSubmitDialog } from "@/components/ConfirmSubmitDialog";
 interface AttemptLayoutProps {
   attemptQuestionsTemp: AttemptQuestion[];
   attemptTemp: Attempt;
@@ -22,10 +20,15 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
   const topicId = topic.id
   const [attemptQuestions, setAttemptQuestions] = useState<AttemptQuestion[]>([]);
   const [attempt, setAttempt] = useState<Attempt>();
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
   const searchParams = useSearchParams()
   const graded = searchParams.get("graded") === "true";
 
   const [activeQuestion, setActiveQuestion] = useState(0);
+  const isLastQuestion = activeQuestion + 1 === attemptQuestions.length - 1;
+  const isTest = topic.topicType === "TEST";
   const [previouslySubmittedAnswerIds, setPreviouslySubmittedAnswerIds] =
     useState<Record<string, string | null>>({});
   
@@ -68,7 +71,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
   const handleNextClick = async (questionId: string, answerId: string) => {
     if(!attemptQuestions) return
 
-    if(previouslySubmittedAnswerIds[questionId] === answerId) {
+    if(previouslySubmittedAnswerIds[questionId] === answerId && !isLastQuestion) {
       if(activeQuestion + 1 < attemptQuestions?.length){
         setActiveQuestion(activeQuestion + 1)
         return
@@ -76,6 +79,11 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
     }
 
     const data = await submitAnswer(answerId, questionId);
+
+    if (isLastQuestion && isTest) {
+      setShowConfirm(true);
+      return;
+    }
 
     if(topic.topicType === "TEST"){
       setActiveQuestion(activeQuestion + 1)
@@ -119,6 +127,20 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
       [questionId]: answerId
     }))
   }
+
+  const handleConfirmSubmit = async () => {
+    setSubmitting(true);
+    try {
+      // await submitAnswer(answerId, questionId);     // need these two in scope, see note below
+      setActiveQuestion(activeQuestion + 1);
+      if (attempt && !attempt.isFinalized) {
+        await gradeAttempt(attempt.id, topicId);
+      }
+      setShowConfirm(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const DisplayChoices = () => {
     const currentQuestion = attemptQuestions[activeQuestion];
@@ -369,7 +391,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
               onClick={() => {
                 if(activeQuestion+1 === attemptQuestions.length)
                   redirect(`/student-dashboard/attempts?topicId=${topicId}`)
-                
+
                 handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId)
               }}
             >
@@ -379,6 +401,13 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
         </div>
         }
       </div>
+      <ConfirmSubmitDialog
+        open={showConfirm}
+        submitting={submitting}
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={handleConfirmSubmit}
+      />
+
     </div>
   )
 }
