@@ -11,6 +11,7 @@ import { SearchParams } from "next/dist/server/request/search-params";
 import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
 import { refresh } from "next/cache";
 import { Topic } from "../../types";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 interface AttemptLayoutProps {
   attemptQuestionsTemp: AttemptQuestion[];
   attemptTemp: Attempt;
@@ -73,15 +74,15 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
         return
       }
     }
-    
+
+    const data = await submitAnswer(answerId, questionId);
+
     if(topic.topicType === "TEST"){
       setActiveQuestion(activeQuestion + 1)
       if(attemptQuestions[activeQuestion + 1].id === "" && !attempt?.isFinalized && topic.topicType === "TEST") {
         await gradeAttempt(attempt?.id || "", topicId) //Grade the attempt
       }
     }
-
-    const data = await submitAnswer(answerId, questionId);
     
     let isCorrect: boolean | null = null;
     if(data.data === true) {
@@ -167,9 +168,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
               Your Score
             </p>
 
-            <p className="mt-2 text-5xl font-bold text-blue-700">
-              {percentage.toFixed(1)}%
-            </p>
+            <AnimatedNumber value={percentage} className="mt-2 text-5xl font-bold text-blue-700"/>
 
             <p className="mt-2 text-gray-600">
               {pointsEarned} / {totalPoints} points
@@ -183,10 +182,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
               <p className="text-sm font-semibold text-green-700">
                 Correct
               </p>
-
-              <p className="mt-1 text-3xl font-bold text-green-800">
-                {correctCount}
-              </p>
+              <AnimatedNumber value={correctCount} className="mt-1 text-3xl font-bold text-green-800" isPercentage={false}/>
 
               <p className="text-sm text-green-700">
                 questions
@@ -199,9 +195,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
                 Incorrect
               </p>
 
-              <p className="mt-1 text-3xl font-bold text-red-800">
-                {incorrect}
-              </p>
+              <AnimatedNumber value={incorrect} className="mt-1 text-3xl font-bold text-red-800" isPercentage={false}/>
 
               <p className="text-sm text-red-700">
                 questions
@@ -214,9 +208,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
                 Unanswered
               </p>
 
-              <p className="mt-1 text-3xl font-bold text-gray-700">
-                {unanswered}
-              </p>
+              <AnimatedNumber value={unanswered} className="mt-1 text-3xl font-bold text-gray-700" isPercentage={false}/>
 
               <p className="text-sm text-gray-600">
                 questions
