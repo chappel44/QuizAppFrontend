@@ -5,6 +5,8 @@ export interface Section {
   topics: Topic[]
 }
 
+export type TopicType = "TEST" | "RANDOM_QUESTIONS" | "REVIEW" | "QUIZ"
+
 export interface Topic {
   id: string;
   name: string;
@@ -12,4 +14,5 @@ export interface Topic {
   createdAt: string;
   dueDate: string;
   isActive: boolean;
+  topicType: TopicType;
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Attempt } from "./types";
 import { Topic } from "../types";
 import { Answer, AttemptQuestion } from "./[attemptId]/types";
+import { refresh } from "next/cache";
 
 interface AttemptResult { 
   attempts: Attempt[]; 
@@ -15,8 +16,8 @@ export async function getAttemptHistory(topicId: string): Promise<AttemptResult>
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
   if (!token) {
-     redirect("/"); 
-  } 
+    redirect("/"); 
+  }
   const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/student/attempts?topicId=${topicId}`, { 
     headers: 
       { 
@@ -25,17 +26,17 @@ export async function getAttemptHistory(topicId: string): Promise<AttemptResult>
     }
   );
 
-  if (!res.ok) { 
+  if (!res.ok) {
     throw new Error("Failed to fetch attempts"); 
   }
 
-  const body = await res.json(); 
+  const body = await res.json();
 
-  return { attempts: body.data.attempts, topic: body.data.topic }; 
+  return { attempts: body.data.attempts, topic: body.data.topic };
 }
 
 export async function getAttempt(attemptId: string) {
-  const cookieStore = await cookies(); 
+  const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value; 
   if (!token) {
      redirect("/"); 
@@ -61,6 +62,7 @@ export async function getAttempt(attemptId: string) {
     percentage: data.attempt.percentage,
     totalPoints: data.attempt.totalPoints,
     pointsEarned: data.attempt.pointsEarned,
+    isFinalized: data.attempt.finalized
   } as Attempt
 
   const attemptQuestions = data.attempt.attemptQuestions.map((attemptQuestion: AttemptQuestion) => ({
@@ -80,7 +82,7 @@ export async function getAttempt(attemptId: string) {
     }
   }))
 
-  return {attempt, attemptQuestions, topicId: data.topic.id};
+  return {attempt, attemptQuestions, topic: data.topic};
 }
 
 export async function submitAnswer(answerId: string, attemptQuestionId: string) {
@@ -138,5 +140,5 @@ const cookieStore = await cookies();
       method: "PATCH",
     },
   );
-  redirect(`/student-dashboard/attempts?topicId=${topicId}`)
+  await refresh()
 }

@@ -5,5 +5,6 @@ export interface Attempt {
   percentage: number;
   pointsEarned: number;
   totalPoints: number;
+  isFinalized: boolean;
   attemptQuestions?: AttemptQuestion[] | undefined;
 }

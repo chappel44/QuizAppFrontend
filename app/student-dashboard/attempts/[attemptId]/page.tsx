@@ -13,7 +13,9 @@ export default async function AttemptPage({params}: AttemptPageProps){
 
   const data = await getAttempt(attemptId)
 
-  console.log('DATA:', data)
+  const topic = data.topic
+  const attemptQuestions = data.attemptQuestions
+  const attempt = data.attempt
 
-  return <AttemptLayout attemptTemp = {data.attempt} attemptQuestionsTemp={data.attemptQuestions} topicId={data.topicId}/>
+  return <AttemptLayout attemptTemp = {attempt} attemptQuestionsTemp={attemptQuestions} topic={topic}/>
 }

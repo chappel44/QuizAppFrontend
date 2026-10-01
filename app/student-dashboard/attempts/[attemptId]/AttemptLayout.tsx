@@ -4,19 +4,26 @@ import { useEffect, useState } from "react";
 import { Attempt } from "../types";
 import { Answer, AttemptQuestion, Question } from "./types";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { gradeAttempt, submitAnswer } from "../actions";
+import { getAttempt, gradeAttempt, submitAnswer } from "../actions";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
-
-interface AttemptLayoutProps{
+import { redirect, useSearchParams } from "next/navigation";
+import { SearchParams } from "next/dist/server/request/search-params";
+import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
+import { refresh } from "next/cache";
+import { Topic } from "../../types";
+interface AttemptLayoutProps {
   attemptQuestionsTemp: AttemptQuestion[];
   attemptTemp: Attempt;
-  topicId: string;
+  topic: Topic;
 }
 
-export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicId} : AttemptLayoutProps) {
+export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic} : AttemptLayoutProps) {
+  const topicId = topic.id
   const [attemptQuestions, setAttemptQuestions] = useState<AttemptQuestion[]>([]);
   const [attempt, setAttempt] = useState<Attempt>();
+  const searchParams = useSearchParams()
+  const graded = searchParams.get("graded") === "true";
+
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [previouslySubmittedAnswerIds, setPreviouslySubmittedAnswerIds] =
     useState<Record<string, string | null>>({});
@@ -58,19 +65,22 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
   };
 
   const handleNextClick = async (questionId: string, answerId: string) => {
+    if(!attemptQuestions) return
+
     if(previouslySubmittedAnswerIds[questionId] === answerId) {
-      if(activeQuestion + 1 < (attemptQuestions && attemptQuestions?.length || 0)){
-        setActiveQuestion(activeQuestion+1)
+      if(activeQuestion + 1 < attemptQuestions?.length){
+        setActiveQuestion(activeQuestion + 1)
         return
-      }
-      else {
-        if(questionId.trim() != null && answerId.trim() != null) {
-          await gradeAttempt(attempt?.id || "", topicId)
-          return
-        }
       }
     }
     
+    if(topic.topicType === "TEST"){
+      setActiveQuestion(activeQuestion + 1)
+      if(attemptQuestions[activeQuestion + 1].id === "" && !attempt?.isFinalized && topic.topicType === "TEST") {
+        await gradeAttempt(attempt?.id || "", topicId) //Grade the attempt
+      }
+    }
+
     const data = await submitAnswer(answerId, questionId);
     
     let isCorrect: boolean | null = null;
@@ -125,16 +135,13 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
 
         switch (attemptQuestion.isCorrect) {
           case true: 
-            console.log("ADDING TO ATTEMPT POINTS")
             pointsEarned += attemptQuestion.question.points
             correctCount ++
             break
           case false: 
-            console.log("INCREMENTING INCRORECT")
             incorrect += 1
             break
           case null:
-            console.log("ADD TO UNANSWERED")
             unanswered += 1
             break          
         }
@@ -313,7 +320,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
     });
 
     setPreviouslySubmittedAnswerIds(submittedAnswers);
-  }, [])
+  }, [attemptQuestionsTemp, attemptTemp, topic])
 
   const leftArrowDisabled = activeQuestion - 1 < 0
   const rightArrowDisabled = attemptQuestions && activeQuestion + 1 >= attemptQuestions.length;
@@ -367,7 +374,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topicI
                 handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId)
               }}
             >
-              {activeQuestion+1 === attemptQuestions.length ? "Finish" : <div className="flex gap-2 items-center">Next <ArrowRight /></div>}
+              {activeQuestion+1 === attemptQuestions.length-1 ? topic.topicType == "TEST" ? "Submit Test" : "View Results" : <div className="flex gap-2 items-center">Next <ArrowRight /></div>}
             </button>
           </div>
         </div>
