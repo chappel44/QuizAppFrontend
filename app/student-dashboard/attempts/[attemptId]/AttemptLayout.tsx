@@ -151,73 +151,80 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
       const totalQuestions = attemptQuestions.length-1;
       const percentage =
         totalPoints > 0 ? (pointsEarned / totalPoints) * 100 : 0;
-
+      const topicType = topic.topicType
       return (
         <div className="flex w-full flex-col items-center">
-          <h2 className="text-3xl font-bold text-gray-800">
-            Quiz Complete!
+          <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+            {
+            topicType == "TEST" ? 
+              "Test" : 
+              topicType == "QUIZ" ? 
+                "Quiz":
+                topicType == "RANDOM_QUESTIONS" ? 
+                  "Random Questions" :
+                  "Review"
+            } Complete!
           </h2>
 
-          <p className="mt-2 text-gray-600">
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Here's how you did.
           </p>
 
           {/* Score */}
-          <div className="mt-4 flex flex-col items-center rounded-2xl bg-blue-50 px-12 py-8 shadow-lg">
-            <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <div className="mt-3 flex w-full flex-col items-center rounded-2xl bg-blue-50 px-6 py-13 shadow-lg sm:mt-4 sm:w-auto sm:px-12 sm:py-8">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 sm:text-sm">
               Your Score
             </p>
 
-            <AnimatedNumber value={percentage} className="mt-2 text-5xl font-bold text-blue-700"/>
+            <AnimatedNumber
+              value={percentage}
+              isPercentage
+              className="mt-1 text-4xl font-bold text-blue-700 sm:mt-2 sm:text-5xl"
+            />
 
-            <p className="mt-2 text-gray-600">
+            <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
               {pointsEarned} / {totalPoints} points
             </p>
           </div>
 
-          {/* Statistics */}
-          <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Statistics: 3 columns on every screen size */}
+          <div className="mt-4 grid w-full grid-cols-3 gap-2 sm:mt-8 sm:gap-4">
             {/* Correct */}
-            <div className="flex flex-col items-center rounded-xl border border-green-300 bg-green-50 p-5">
-              <p className="text-sm font-semibold text-green-700">
-                Correct
-              </p>
-              <AnimatedNumber value={correctCount} className="mt-1 text-3xl font-bold text-green-800" isPercentage={false}/>
-
-              <p className="text-sm text-green-700">
-                questions
-              </p>
+            <div className="flex flex-col items-center rounded-xl border border-green-300 bg-green-50 p-2 sm:p-5">
+              <p className="text-xs font-semibold text-green-700 sm:text-sm">Correct</p>
+              <AnimatedNumber
+                value={correctCount}
+                className="text-2xl font-bold text-green-800 sm:mt-1 sm:text-3xl"
+                isPercentage={false}
+              />
+              <p className="hidden text-sm text-green-700 sm:block">questions</p>
             </div>
 
             {/* Incorrect */}
-            <div className="flex flex-col items-center rounded-xl border border-red-300 bg-red-50 p-5">
-              <p className="text-sm font-semibold text-red-700">
-                Incorrect
-              </p>
-
-              <AnimatedNumber value={incorrect} className="mt-1 text-3xl font-bold text-red-800" isPercentage={false}/>
-
-              <p className="text-sm text-red-700">
-                questions
-              </p>
+            <div className="flex flex-col items-center rounded-xl border border-red-300 bg-red-50 p-2 sm:p-5">
+              <p className="text-xs font-semibold text-red-700 sm:text-sm">Incorrect</p>
+              <AnimatedNumber
+                value={incorrect}
+                className="text-2xl font-bold text-red-800 sm:mt-1 sm:text-3xl"
+                isPercentage={false}
+              />
+              <p className="hidden text-sm text-red-700 sm:block">questions</p>
             </div>
 
             {/* Unanswered */}
-            <div className="flex flex-col items-center rounded-xl border border-gray-300 bg-gray-50 p-5">
-              <p className="text-sm font-semibold text-gray-600">
-                Unanswered
-              </p>
-
-              <AnimatedNumber value={unanswered} className="mt-1 text-3xl font-bold text-gray-700" isPercentage={false}/>
-
-              <p className="text-sm text-gray-600">
-                questions
-              </p>
+            <div className="flex flex-col items-center rounded-xl border border-gray-300 bg-gray-50 p-2 sm:p-5">
+              <p className="text-xs font-semibold text-gray-600 sm:text-sm">Unanswered</p>
+              <AnimatedNumber
+                value={unanswered}
+                className="text-2xl font-bold text-gray-700 sm:mt-1 sm:text-3xl"
+                isPercentage={false}
+              />
+              <p className="hidden text-sm text-gray-600 sm:block">questions</p>
             </div>
           </div>
 
           {/* Question count */}
-          <div className="mt-6 text-sm text-gray-500">
+          <div className="mt-3 text-xs text-gray-500 sm:mt-6 sm:text-sm">
             {totalQuestions} total questions
           </div>
         </div>
