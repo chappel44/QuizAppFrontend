@@ -85,11 +85,13 @@ export async function getAttempt(attemptId: string) {
   return {attempt, attemptQuestions, topic: data.topic};
 }
 
-export async function submitAnswer(answerId: string, attemptQuestionId: string) {
+export async function submitAnswer(answerId: string | null, attemptQuestionId: string) {
+  if (!answerId) return null;
+
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
   if (!token) {
-     redirect("/"); 
+    redirect("/"); 
   }
   const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/student/attempt/record/question?answerId=${answerId}&attemptQuestionId=${attemptQuestionId}`, { 
     headers: 
@@ -100,7 +102,9 @@ export async function submitAnswer(answerId: string, attemptQuestionId: string) 
       method: "PATCH",
     },
   );
+  console.log("RES SUBMIT ANSWER:", res)
   const body = await res.json()
+  console.log("BODY SUBMIT ANSWER:", body)
   return body
 }
 

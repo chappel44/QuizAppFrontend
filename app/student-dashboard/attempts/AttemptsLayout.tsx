@@ -5,6 +5,7 @@ import { Topic } from "../types";
 import { Attempt } from "./types"
 import { redirect } from "next/navigation";
 import { createAttempt } from "./actions";
+import Link from "next/link";
 
 interface AttemptLayoutProps {
   attempts: Attempt[];
@@ -32,14 +33,13 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
 
     <div className="mx-auto flex w-full max-w-3xl flex-col">
       <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl">
-        <button 
-        onClick={() => {
-            redirect("/student-dashboard")
-        }}
-        className="flex items-center text-blue-500 gap-1 cursor-pointer hover:text-blue-700"
+       <Link
+          href={`/student-dashboard`}
+          className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 active:scale-95"
         >
-          <ArrowLeft className="w-8 h-8"/> Back to Dashboard
-        </button>
+          <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+          Back to dashboard
+        </Link>
 
         <div className="py-5 border-b border-blue-200 flex max-w-sm justify-between mx-auto">
           <div

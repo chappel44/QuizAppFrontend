@@ -10,6 +10,7 @@ import { redirect, useSearchParams } from "next/navigation";
 import { Topic } from "../../types";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ConfirmSubmitDialog } from "@/components/ConfirmSubmitDialog";
+import Link from "next/link";
 interface AttemptLayoutProps {
   attemptQuestionsTemp: AttemptQuestion[];
   attemptTemp: Attempt;
@@ -35,10 +36,8 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
   const toastDuration = 1500;
 
   const playCorrectSound = () => {
-    // Instantiate Audio only when the user interacts
     const audio = new Audio('/sounds/correct-answer-effect.mp3');
     
-    // Optional: Adjust volume (0.0 to 1.0)
     audio.volume = 0.2; 
     
     audio.play().catch((error) => {
@@ -47,10 +46,8 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
   };
 
   const playIncorrectSound = () => {
-    // Instantiate Audio only when the user interacts
     const audio = new Audio('/sounds/incorrect-sound-effect.mp3');
     
-    // Optional: Adjust volume (0.0 to 1.0)
     audio.volume = 0.2; 
     
     audio.play().catch((error) => {
@@ -68,19 +65,27 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
     });
   };
 
+  const handleConfirmSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const answerId = attemptQuestions[activeQuestion].submittedAnswerId
+      const questionId = attemptQuestions[activeQuestion].id
+      console.log("ATTEMPT QUESTION", attemptQuestions[activeQuestion])
+      await submitAnswer(answerId, questionId);
+      setActiveQuestion(activeQuestion + 1);
+      if (attempt && !attempt.isFinalized) {
+        await gradeAttempt(attempt.id, topicId);
+      }
+      setShowConfirm(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleNextClick = async (questionId: string, answerId: string) => {
     if(!attemptQuestions) return
 
-    if(previouslySubmittedAnswerIds[questionId] === answerId && !isLastQuestion) {
-      if(activeQuestion + 1 < attemptQuestions?.length){
-        setActiveQuestion(activeQuestion + 1)
-        return
-      }
-    }
-
-    const data = await submitAnswer(answerId, questionId);
-
-    if (isLastQuestion && isTest) {
+    if (isLastQuestion && isTest && !attempt?.isFinalized) {
       setShowConfirm(true);
       return;
     }
@@ -91,7 +96,16 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
         await gradeAttempt(attempt?.id || "", topicId) //Grade the attempt
       }
     }
-    
+
+    if(previouslySubmittedAnswerIds[questionId] === answerId) {
+      if(activeQuestion + 1 < attemptQuestions?.length){
+        setActiveQuestion(activeQuestion + 1)
+        return
+      }
+    }
+
+    const data = await submitAnswer(answerId, questionId);
+
     let isCorrect: boolean | null = null;
     if(data.data === true) {
       isCorrect = true
@@ -127,20 +141,6 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
       [questionId]: answerId
     }))
   }
-
-  const handleConfirmSubmit = async () => {
-    setSubmitting(true);
-    try {
-      // await submitAnswer(answerId, questionId);     // need these two in scope, see note below
-      setActiveQuestion(activeQuestion + 1);
-      if (attempt && !attempt.isFinalized) {
-        await gradeAttempt(attempt.id, topicId);
-      }
-      setShowConfirm(false);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const DisplayChoices = () => {
     const currentQuestion = attemptQuestions[activeQuestion];
@@ -351,14 +351,13 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
       <div className="mx-auto flex w-full max-w-3xl flex-col justify-center h-screen">
       { attemptQuestions && 
         <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl space-y-8">
-          <button 
-            onClick={() => {
-                redirect(`/student-dashboard/attempts?topicId=${topicId}`)
-            }}
-            className="flex items-center text-blue-500 gap-1 cursor-pointer hover:text-blue-700"
+          <Link
+            href={`/student-dashboard/attempts?topicId=${topicId}`}
+            className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 active:scale-95"
           >
-              <ArrowLeft className="w-8 h-8"/> Back to topic
-          </button>
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+            Back to topic
+          </Link>
           
           {/* Progress bar section */}
           <div className="flex items-center gap-3 w-full max-w-md mx-auto px-4">
