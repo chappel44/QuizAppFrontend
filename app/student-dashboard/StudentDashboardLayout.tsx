@@ -4,15 +4,16 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from "radix-ui/acco
 import { Section, Topic } from "./types"
 import { Accordion } from "radix-ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import { motion } from "framer-motion"
 
 type StudentDashboardLayoutProps = {
   sections: Section[] | undefined;
+  renderButtons: (topicId: string) => ReactNode;
 };
 
-export default function StudentDashboardLayout({sections}: StudentDashboardLayoutProps) {
+export default function StudentDashboardLayout({renderButtons, sections}: StudentDashboardLayoutProps) {
   const [openSections, setOpenSections] = useState<boolean[]>(Array(sections?.length).fill(false))
 
   console.log("OPEN SECTIONS", openSections)
@@ -27,9 +28,6 @@ export default function StudentDashboardLayout({sections}: StudentDashboardLayou
 
   return (
     <div className="px-4">
-      <h1 className="flex w-full justify-center py-20 text-4xl font-bold text-white">
-        Student Dashboard
-      </h1>
 
       <div className="mx-auto flex w-full max-w-5xl flex-col space-y-4 text-gray-800">
         {sections?.map((section: Section, index: number) => (
@@ -74,12 +72,13 @@ export default function StudentDashboardLayout({sections}: StudentDashboardLayou
                             <h4 className="text-lg font-medium">{topic.name}</h4>
                             <p className="text-sm text-gray-600">{topic.description}</p>
                           </div>
-                          <a
-                            href={`/student-dashboard/attempts?topicId=${topic.id}`}
-                            className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
-                          >
-                            View Attempts
-                          </a>
+                          {renderButtons(topic.id)}
+                          {/* {<a
+                              href={`/student-dashboard/attempts?topicId=${topic.id}`}
+                              className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
+                            >
+                              View Attempts
+                            </a>} */}
                         </div>
                       ))}
                     </div>
