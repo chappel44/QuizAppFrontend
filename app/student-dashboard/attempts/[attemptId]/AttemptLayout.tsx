@@ -300,7 +300,7 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
                 className={`flex w-full items-center justify-between rounded-lg border px-4 py-4 text-left transition-all ${borderClass}`}
                 onClick={() =>
                   handleSelectAnswer(
-                    answer.id,
+                    answer.id || "",
                     currentQuestion.id
                   )
                 }
