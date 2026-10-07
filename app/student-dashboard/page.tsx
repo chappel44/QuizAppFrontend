@@ -21,7 +21,7 @@ export default async function StudentDashboard(){
       <h1 className="flex w-full justify-center py-20 text-4xl font-bold text-white">
         Student Dashboard
       </h1>
-      <StudentDashboardLayout sections = {res.sections} renderButtons={renderStudentButtons}/>
+      <StudentDashboardLayout sections = {res.sections} role="STUDENT"/>
     </>
   )
 }

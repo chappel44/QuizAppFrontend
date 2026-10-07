@@ -12,13 +12,11 @@ import Card from "@/components/Card";
 
 type StudentDashboardLayoutProps = {
   sections: Section[] | undefined;
-  renderButtons: (topicId: string) => ReactNode;
+  role?: "STUDENT" | "ADMIN"
 };
 
-export default function StudentDashboardLayout({renderButtons, sections}: StudentDashboardLayoutProps) {
+export default function StudentDashboardLayout({sections, role}: StudentDashboardLayoutProps) {
   const [openSections, setOpenSections] = useState<boolean[]>(Array(sections?.length).fill(false))
-
-  console.log("OPEN SECTIONS", openSections)
 
   const handleOpenSectionChange = (index: number) => {
     setOpenSections((openSections: boolean[]) => {
@@ -30,10 +28,9 @@ export default function StudentDashboardLayout({renderButtons, sections}: Studen
 
   return (
     <div className="px-4">
-
       <div className="mx-auto flex w-full max-w-5xl flex-col space-y-4 text-gray-800">
         {sections?.map((section: Section, index: number) => (
-          <SectionCard>
+          <SectionCard key={section.id}>
             <Accordion.Root
               type = "multiple"
               onValueChange={() => handleOpenSectionChange(index)}
@@ -66,19 +63,29 @@ export default function StudentDashboardLayout({renderButtons, sections}: Studen
 
                     <div className="space-y-8 border-l-2 border-blue-300 pl-4">
                       {section.topics.map((topic: Topic, index: number) => (
-                        <Card hoverable = {true}>
+                        <Card key = {topic.id} hoverable = {true}>
                           <div>
                             <p>Topic #{index + 1}</p>
                             <h4 className="text-lg font-medium">{topic.name}</h4>
                             <p className="text-sm text-gray-600">{topic.description}</p>
                           </div>
-                          {renderButtons(topic.id)}
-                          {/* {<a
-                              href={`/student-dashboard/attempts?topicId=${topic.id}`}
-                              className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
-                            >
-                              View Attempts
-                            </a>} */}
+                          {role === "STUDENT" ? 
+                            (
+                              <a
+                                href={`/student-dashboard/attempts?topicId=${topic.id}`}
+                                className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
+                              >
+                                View Attempts
+                              </a>
+                            ) : (
+                              <a
+                                href={`/admin-dashboard/edit/topic/${topic.id}`}
+                                className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
+                              >
+                                Edit Topic
+                              </a>
+                            )
+                          }
                         </Card>
                       ))}
                     </div>

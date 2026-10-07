@@ -16,7 +16,7 @@ export interface AttemptQuestion {
 }
 
 export interface Question {
-  id: string;
+  id?: string | null;
   question: string;
   points: number;
   imageUrl: string;
@@ -25,10 +25,10 @@ export interface Question {
 }
 
 export interface Answer {
-  id: string;
+  id?: string | null;
   answer: string;
   createdAt: string;
-  //Fields below only come during fetch to the topic
+  //Fields below only come during fetch to the topic (why they are nullable)
   active?: boolean | null; 
   correct?: boolean | null
 }

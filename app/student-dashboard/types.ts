@@ -18,4 +18,5 @@ export interface Topic {
   active: boolean;
   topicType: TopicType;
   questions?: Question[];
+  section: string;
 }

@@ -1,3 +1,7 @@
+"use server"
+
+import type { Question } from "@/app/student-dashboard/attempts/[attemptId]/types";
+import type { Topic } from "@/app/student-dashboard/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -15,6 +19,49 @@ export async function getTopic(topicId: string): Promise<TopicResults> {
         Authorization: `Bearer ${token}` 
       }, 
     }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch attempts"); 
+  }
+
+  const body = await res.json();
+
+  return {success: true, data: {topic: body.data}};
+}
+
+export async function updateTopic(topicId: string, topic: Topic, questions: Question[]): Promise<TopicResults> { 
+  const cookieStore = await cookies(); 
+  const token = cookieStore.get("token")?.value; 
+  
+  if (!token) {
+    redirect("/"); 
+  }
+
+  const normalizedTopic = {
+    ...topic,
+    isActive: topic.active,
+  };
+
+  const normalizedQuestions = questions.map((question) => ({
+    ...question,
+    isActive: question.active,
+    answers: question.answers.map((answer) => (console.log("answers:", answer), {
+      ...answer,
+      isActive: answer.active,
+      isCorrect: answer.correct,
+    })),
+  }));
+
+  const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics?topicId=${topicId}`, { 
+    method: 'PATCH',
+    headers: 
+      { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({topic: normalizedTopic, questions: normalizedQuestions})
+    },
   );
 
   if (!res.ok) {

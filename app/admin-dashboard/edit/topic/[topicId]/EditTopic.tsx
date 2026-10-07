@@ -7,9 +7,11 @@ import Input from "@/components/Input"
 import SectionCard from "@/components/SectionCard"
 import { useState } from "react"
 import { Switch, RadioGroup, AlertDialog, Accordion } from "radix-ui"
-import { a, label } from "framer-motion/client"
 import { AccordionContent, AccordionTrigger } from "radix-ui/accordion"
-import { ChevronUp } from "lucide-react"
+import { ArrowLeft, ChevronUp, PlusIcon } from "lucide-react"
+import { updateTopic } from "./action"
+import AlertButton from "@/components/AlertButton"
+import Link from "next/link"
 
 interface EditTopicProps {
   topic: Topic
@@ -36,6 +38,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [questionAnswersOpen, setQuestionAnswersOpen] = useState<boolean[]>(Array(initialQuestions?.length).fill(false))
+  const [updating, setUpdating] = useState(false)
 
   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = String(e.target.id)
@@ -76,6 +79,42 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
       updated[index] = !updated[index]
       return updated
     })
+  }
+
+  const handleAddQuestion = () => {
+    setQuestions((questions: Question[]) => 
+      [ ...questions,
+        {
+          id: null,
+          question: "",
+          points: 1,
+          imageUrl: "",
+          active: true,
+          answers: []
+        }
+      ]
+    )
+  }
+
+  const handleAddAnswer = (questionIndex: number) => {
+    setQuestions((questions: any) => 
+      questions.map((question: Question, questIndex: number) => 
+        questIndex === questionIndex && question.answers.length < 5
+        ? {
+            ...question,
+            answers: [
+              ...question.answers,
+              {
+                id: null,
+                answer: "",
+                active: true,
+                correct: false
+              }
+            ]
+          }
+        : question
+      ) 
+    )
   }
 
   const handleAnswerCorrectToggle = (
@@ -130,71 +169,51 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
     );
   }
 
+  const handleDeleteTopic = () => {
+    console.log("DELETING TOPIC")
+  }
+
+  const handleDeleteQuestion = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const questionId = String(e.currentTarget.id)
+    console.log("Handling delete question id:", questionId)
+    setQuestions((questions: any) => 
+      questions.filter((question: Question) => question.id !== questionId) //Keep elements where question.id !== questionId is true otherwise remove 
+    )
+  }
+
+  const handleDeleteAnswer= (e: React.MouseEvent<HTMLButtonElement>) => {
+    const [questionIndex, answerId] = String(e.currentTarget.id).split(" ")
+
+    setQuestions((questions: any) => 
+      questions.map((question: Question, questIndex: number) =>
+        Number(questionIndex) === questIndex
+        ?
+        { 
+          ...question,
+          answers:  question.answers.filter((answer: Answer) => answer.id !== answerId)
+        } 
+        : question
+      )
+    )
+  }
+
   return(
     <div className="py-20 max-w-7xl flex mx-auto px-4">
       <SectionCard>
+        <Link
+          href={`/admin-dashboard`}
+          className="mb-4 group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 active:scale-95"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+          Back to dashboard
+        </Link>
         <Card>
           <div className="space-y-6">
             <div className="flex justify-between w-full">
-              <AlertDialog.Root>
-                <AlertDialog.Trigger asChild>
-                  <button
-                    className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white
-                              hover:bg-red-700 transition-colors shadow-md
-                              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                  >
-                    Delete topic
-                  </button>
-                </AlertDialog.Trigger>
-
-                <AlertDialog.Portal>
-                  <AlertDialog.Overlay
-                    className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-                  />
-
-                  <AlertDialog.Content
-                    className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md
-                    -translate-x-1/2 -translate-y-1/2
-                    rounded-lg bg-white p-6 shadow-xl
-                    focus:outline-none"
-                  >
-                    <AlertDialog.Title className="text-lg font-semibold text-gray-900">
-                      Are you absolutely sure?
-                    </AlertDialog.Title>
-
-                    <AlertDialog.Description className="mt-2 text-sm leading-6 text-gray-600">
-                      This action cannot be undone. This will permanently delete the topic.
-                    </AlertDialog.Description>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                      <AlertDialog.Cancel asChild>
-                        <button
-                          className="rounded-md border border-gray-300 bg-white px-4 py-2
-                            text-sm font-medium text-gray-700
-                            hover:bg-gray-50
-                            focus:outline-none focus:ring-2 focus:ring-gray-400
-                            focus:ring-offset-2"
-                        >
-                          Cancel
-                        </button>
-                      </AlertDialog.Cancel>
-
-                      <AlertDialog.Action asChild>
-                        <button
-                          className="rounded-md bg-red-600 px-4 py-2
-                            text-sm font-medium text-white
-                            hover:bg-red-700
-                            focus:outline-none focus:ring-2 focus:ring-red-500
-                            focus:ring-offset-2"
-                        >
-                          Yes, delete topic
-                        </button>
-                      </AlertDialog.Action>
-                    </div>
-                  </AlertDialog.Content>
-                </AlertDialog.Portal>
-              </AlertDialog.Root>
-
+              <AlertButton
+                name="Topic"
+                onClick={handleDeleteTopic}
+              />
               {/* TOGGLE TOPIC ACTIVE */}
               <div className="flex items-center justify-end">
                 <label
@@ -238,9 +257,9 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                 }}
               >
                 {topicTypes.map((topic, index) => (
-                  <div className="flex items-center gap-2">
+                  <div key={topic.label} className="flex items-center gap-2">
                     <RadioGroup.Item
-                      className="h-5 w-5 rounded-full border border-blue-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 data-[state=checked]:border-blue-600"
+                      className="h-5 w-5 rounded-full border border-blue-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 data-[state=checked]:border-blue-600 shadow-lg"
                       value={topic.value}
                       id={"topicType" + index}
                     >
@@ -319,7 +338,14 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
 
             <AccordionContent className="border-t border-blue-100 px-4 py-4 space-y-4">
               {questions.map((question: Question, questionIndex: number) => (
-                <Card key={question.id}>
+                <Card key={question.id || "" + questionIndex}>
+                  <div className="max-w-sm mb-4">
+                    <AlertButton
+                      name="question"
+                      onClick={handleDeleteQuestion}
+                      id = {question.id}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Input value={question.question} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
                     <Input value={question.points.toString()} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
@@ -367,60 +393,95 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                           <ChevronUp className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${questionAnswersOpen[questionIndex] ? "rotate-0" : 'rotate-180'}`} />
                         </AccordionTrigger>
 
-                        <AccordionContent className="border-t border-blue-100 px-4 py-4">
+                        <AccordionContent className="border-t border-blue-100 px-4 py-4 space-y-4">
                           {question.answers.map(
                             (answer: Answer, answerIndex: number) => (
-                              <div
-                                key={answer.id ?? answerIndex}
-                                className="mb-4 last:mb-0"
-                              >
-                                <Input
-                                  value={answer.answer}
-                                  name={`answer ${questionIndex} ${answerIndex}`}
-                                  label="Answer"
-                                  handleInputChange={(e) =>
-                                    handleAnswerChange(
-                                      e
-                                    )
-                                  }
-                                />
-
-                                <div className="mt-3 flex items-center justify-start">
-                                  <label
-                                    htmlFor={`correct-${questionIndex}-${answerIndex}`}
-                                    className="pr-[15px] text-md"
-                                  >
-                                    Is correct
-                                  </label>
-
-                                  <Switch.Root
-                                    id={`correct-${questionIndex}-${answerIndex}`}
-                                    aria-label={`Mark answer ${answerIndex + 1} as correct`}
-                                    className="relative h-5 w-10 rounded-full bg-gray-300 data-[state=checked]:bg-blue-600"
-                                    checked={answer.correct ?? false}
-                                    onCheckedChange={(checked) =>
-                                      handleAnswerCorrectToggle(
-                                        checked,
-                                        questionIndex,
-                                        answerIndex
+                              <Card>
+                                <div className="max-w-sm mb-4">
+                                  <AlertButton
+                                    name="answer"
+                                    onClick={handleDeleteAnswer}
+                                    id = {`${questionIndex} ${answer.id}`}
+                                  />
+                                </div>
+                                <div
+                                  key={answer.id|| "" + answerIndex}
+                                  className="mb-4 last:mb-0"
+                                >
+                                  <Input
+                                    value={answer.answer}
+                                    name={`answer ${questionIndex} ${answerIndex}`}
+                                    label="Answer"
+                                    handleInputChange={(e) =>
+                                      handleAnswerChange(
+                                        e
                                       )
                                     }
-                                  >
-                                    <Switch.Thumb className="block h-4 w-4 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[22px]" />
-                                  </Switch.Root>
+                                  />
+
+                                  <div className="mt-3 flex items-center justify-start">
+                                    <label
+                                      htmlFor={`correct-${questionIndex}-${answerIndex}`}
+                                      className="pr-[15px] text-md"
+                                    >
+                                      Is correct
+                                    </label>
+
+                                    <Switch.Root
+                                      id={`correct-${questionIndex}-${answerIndex}`}
+                                      aria-label={`Mark answer ${answerIndex + 1} as correct`}
+                                      className="relative h-5 w-10 rounded-full bg-gray-300 data-[state=checked]:bg-blue-600"
+                                      checked={answer.correct ?? false}
+                                      onCheckedChange={(checked) =>
+                                        handleAnswerCorrectToggle(
+                                          checked,
+                                          questionIndex,
+                                          answerIndex
+                                        )
+                                      }
+                                    >
+                                      <Switch.Thumb className="block h-4 w-4 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[22px]" />
+                                    </Switch.Root>
+                                  </div>
                                 </div>
-                              </div>
+                              </Card>
                             )
                           )}
+                          <button
+                            type="button"
+                            className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
+                            onClick={() => handleAddAnswer(questionIndex)}
+                            disabled={question.answers.length > 4}
+                          >
+                            <PlusIcon className="h-5 w-5" />
+                            <span>Add Answer</span>
+                          </button>
                         </AccordionContent>
                       </Accordion.Item>
                     </Accordion.Root>
                   </div>
                 </Card>
               ))}
+              <button
+                type="button"
+                className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={handleAddQuestion}
+              >
+                <PlusIcon className="h-5 w-5" />
+                <span>Add Question</span>
+              </button>
             </AccordionContent>
+            
           </Accordion.Item>
+          
         </Accordion.Root>
+        <div className="flex mx-auto w-md justify-center mt-4">
+          <AlertButton
+            name="topic"
+            theme="regular"
+            onClick={() => updateTopic(topic.id, topic, questions)}
+          />
+        </div>
       </SectionCard>
     </div>
   )

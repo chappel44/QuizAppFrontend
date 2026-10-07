@@ -14,5 +14,6 @@ export default async function EditTopicPage({params}: EditTopicPageProps){
   const topic = res.data.topic as Topic
   const questions = topic.questions;
   topic.questions = undefined
+
   return <EditTopic topic = {topic} questions = {questions || []}/>
 }
