@@ -6,6 +6,8 @@ import { Attempt } from "./types"
 import { redirect } from "next/navigation";
 import { createAttempt } from "./actions";
 import Link from "next/link";
+import SectionCard from "@/components/SectionCard";
+import Card from "@/components/Card";
 
 interface AttemptLayoutProps {
   attempts: Attempt[];
@@ -32,7 +34,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
     </h1>*/}
 
     <div className="mx-auto flex w-full max-w-3xl flex-col">
-      <div className="rounded-lg bg-blue-100 px-8 py-6 text-gray-800 shadow-xl">
+      <SectionCard>
        <Link
           href={`/student-dashboard`}
           className="group inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 active:scale-95"
@@ -82,10 +84,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
             :
             <>
               {attempts.map((attempt, index) => (
-                <div
-                  key={attempt.id}
-                  className="flex md:flex-row flex-col md:space-y-0 space-y-4 items-center justify-between rounded-lg border border-blue-300 bg-white px-4 py-4 shadow-sm"
-                >
+                <Card justify="between" direction="row">
                   <div className="flex flex-1 items-center gap-3">
                     <div className="rounded bg-blue-500 px-3 py-2 text-sm font-semibold text-white">
                       Attempt #{index + 1}
@@ -109,7 +108,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
                   >
                     Continue Attempt
                   </a>
-                </div>
+                </Card>
               ))}
             </>
           }
@@ -124,7 +123,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
             Start New Attempt
           </button>
         </div>
-      </div>
+      </SectionCard>
     </div>
   </div>
 )

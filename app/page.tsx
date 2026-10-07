@@ -1,5 +1,7 @@
 "use client"
 
+import Input from "@/components/Input";
+import SectionCard from "@/components/SectionCard";
 import { handleSignin, handleSignup } from "@/lib/auth";
 import { AtSign, Eye, EyeOff, Lock, LockIcon, LockKeyhole, Mail, Plane, PlaneIcon } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -63,92 +65,34 @@ export default function Home() {
   return (
     <div className="w-screen h-screen flex justify-center ">
       <div className="flex flex-col justify-center px-4 w-lg">
-        <div className="flex flex-col bg-blue-50 rounded-xl shadow-lg px-8 py-4 items-center">
-          <PlaneIcon className="w-15 h-15 bg-blue-200 p-1 rounded-full text-blue-400 border border-blue-400 mb-2"/>
-          <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight School {loginOpen ? "Login" : "Sign Up"}</h1>
-          <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
+        <SectionCard>
+          <div className="flex flex-col w-full items-center">
+            <PlaneIcon className="w-15 h-15 bg-blue-200 p-1 rounded-full text-blue-400 border border-blue-400 mb-2"/>
+            <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight School {loginOpen ? "Login" : "Sign Up"}</h1>
+            <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
+          </div>
           <form
             onSubmit={(e) => handleSubmit(e)}
             className="space-y-2 w-full"
           >
-            <div className="flex flex-col text-gray-700">
-              <label 
-                htmlFor="email"
-                className="text-sm text-gray-700/75"
-              >
-                Email
-              </label>
-              <div className="bg-blue-100 border border-blue-300 rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
-                <AtSign className="text-blue-400" />
-                <input
-                  onChange={handleInputChange}
-                  value={formData.email}
-                  id="email"
-                  required
-                  className="focus:outline-none w-full"
-                />
-              </div>
-            </div>
-            <div className={`flex flex-col text-gray-700 ${loginOpen ? "mb-4" : ""}`}>
-              <label
-                htmlFor="password"
-                className="text-sm text-gray-700/75"
-              >
-                Password
-              </label>
-              <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
-                { showPassword ?
+            
+            <Input handleInputChange={handleInputChange} name="email" value={formData.email} label="Email">
+              <AtSign className="text-blue-400" />
+            </Input>
+            <Input handleInputChange={handleInputChange} name = "password" value={formData.password} label="Password">
+              { showPassword ?
                 <EyeOff onClick = {() => setShowPassword(false)} className="text-blue-400"/>
                 :
                 <Eye onClick = {() => setShowPassword(true)} className="text-blue-400"/>
-                }
-                <input 
-                  onChange = {(e) => handleInputChange(e)}
-                  value={formData.password}
-                  required
-                  id = "password" 
-                  type = {showPassword ? "" : "password"}
-                  className="focus:outline-none w-full" 
-                />
-              </div>
-            </div>
+              }
+            </Input>
             {
               !loginOpen && (
               <>
-                <div className="flex flex-col text-gray-700">
-                  <label 
-                    htmlFor="firstName"
-                    className="text-sm text-gray-700/75"
-                  >
-                    First Name
-                  </label>
-                  <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
-                    <input 
-                      onChange = {(e) => handleInputChange(e)}
-                      value={formData.firstName}
-                      required
-                      id = "firstName" 
-                      className="focus:outline-none w-full" 
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col text-gray-700">
-                  <label 
-                    htmlFor="lastName"
-                    className="text-sm text-gray-700/75"
-                  >
-                    Last Name
-                  </label>
-                  <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
-                    <input 
-                      onChange = {(e) => handleInputChange(e)}
-                      value={formData.lastName}
-                      required
-                      id = "lastName" 
-                      className=" focus:outline-none w-full" 
-                    />
-                  </div>
-                </div>
+                <Input handleInputChange={handleInputChange} name="firstName" value={formData.firstName} label = "First Name">
+                  {/* <EyeOff onClick = {() => setShowPassword(false)} className="text-blue-400"/> */}
+                </Input>
+                <Input handleInputChange={handleInputChange} name="lastName" value={formData.lastName} label="Last Name" />
               </>
               )
             }
@@ -174,7 +118,7 @@ export default function Home() {
               </button>
             }
           </form>
-        </div>
+        </SectionCard>
       </div>
     </div>
   );

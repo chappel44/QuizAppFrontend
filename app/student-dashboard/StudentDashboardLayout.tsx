@@ -7,6 +7,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { ReactNode, useState } from "react";
 
 import { motion } from "framer-motion"
+import SectionCard from "@/components/SectionCard";
+import Card from "@/components/Card";
 
 type StudentDashboardLayoutProps = {
   sections: Section[] | undefined;
@@ -31,9 +33,7 @@ export default function StudentDashboardLayout({renderButtons, sections}: Studen
 
       <div className="mx-auto flex w-full max-w-5xl flex-col space-y-4 text-gray-800">
         {sections?.map((section: Section, index: number) => (
-          <div 
-            className="w-full rounded-lg bg-blue-50 px-8 py-5 shadow-xl border-blue-800"
-          >
+          <SectionCard>
             <Accordion.Root
               type = "multiple"
               onValueChange={() => handleOpenSectionChange(index)}
@@ -66,7 +66,7 @@ export default function StudentDashboardLayout({renderButtons, sections}: Studen
 
                     <div className="space-y-8 border-l-2 border-blue-300 pl-4">
                       {section.topics.map((topic: Topic, index: number) => (
-                        <div className="flex flex-col border border-blue-300 bg-white rounded-lg shadow p-4 hover:scale-101 transition-all duration-300 hover:bg-blue-50">
+                        <Card hoverable = {true}>
                           <div>
                             <p>Topic #{index + 1}</p>
                             <h4 className="text-lg font-medium">{topic.name}</h4>
@@ -79,14 +79,14 @@ export default function StudentDashboardLayout({renderButtons, sections}: Studen
                             >
                               View Attempts
                             </a>} */}
-                        </div>
+                        </Card>
                       ))}
                     </div>
                   </motion.div>
                 </AccordionContent>
               </Accordion.Item>
             </Accordion.Root>
-          </div>
+          </SectionCard>
         ))}
       </div>
     </div>
