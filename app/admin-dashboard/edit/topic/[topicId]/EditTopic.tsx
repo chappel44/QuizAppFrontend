@@ -274,6 +274,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                 ))}
               </RadioGroup.Root>
             </div>
+            {topic.topicType === "RANDOM_QUESTIONS" && <Input handleInputChange={handleTopicChange} value={topic.questionPoolSize?.toString() || "1"} name="questionPoolSize" label="Question pool size" />}
             <div className="flex flex-col text-gray-700">
               <label
                 htmlFor="dueDate"

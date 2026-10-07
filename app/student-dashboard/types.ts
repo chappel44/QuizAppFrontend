@@ -18,5 +18,6 @@ export interface Topic {
   active: boolean;
   topicType: TopicType;
   questions?: Question[];
+  questionPoolSize?: number;
   section: string;
 }

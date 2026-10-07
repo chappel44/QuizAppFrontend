@@ -26,7 +26,7 @@ export async function getTopic(topicId: string): Promise<TopicResults> {
   }
 
   const body = await res.json();
-
+  console.log("BODY DATA", body.data)
   return {success: true, data: {topic: body.data}};
 }
 
@@ -69,6 +69,7 @@ export async function updateTopic(topicId: string, topic: Topic, questions: Ques
   }
 
   const body = await res.json();
+  
 
   return {success: true, data: {topic: body.data}};
 }
