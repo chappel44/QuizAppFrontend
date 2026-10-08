@@ -198,7 +198,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
   }
 
   return(
-    <div className="py-20 max-w-7xl flex mx-auto px-4">
+    <div className="py-20 max-w-5xl flex mx-auto px-4">
       <SectionCard>
         <Link
           href={`/admin-dashboard`}
@@ -378,9 +378,9 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                     >
                       <Accordion.Item
                         value={`answers-${questionIndex}`}
-                        className="overflow-hidden rounded-lg border border-blue-200 bg-white"
+                        className="overflow-hidden rounded-lg border border-gray-100 shadow bg-white"
                       >
-                        <AccordionTrigger className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors hover:bg-blue-50">
+                        <AccordionTrigger className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-200 bg-gray-200/30">
                           <div className="flex flex-col">
                             <span className="font-medium text-gray-800">
                               Answers
@@ -397,17 +397,11 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                         <AccordionContent className="border-t border-blue-100 px-4 py-4 space-y-4">
                           {question.answers.map(
                             (answer: Answer, answerIndex: number) => (
-                              <Card>
-                                <div className="max-w-sm mb-4">
-                                  <AlertButton
-                                    name="answer"
-                                    onClick={handleDeleteAnswer}
-                                    id = {`${questionIndex} ${answer.id}`}
-                                  />
-                                </div>
+                              <Card theme="gray">
+                                
                                 <div
                                   key={answer.id|| "" + answerIndex}
-                                  className="mb-4 last:mb-0"
+                                  className="mb-4 last:mb-0 space-y-4"
                                 >
                                   <Input
                                     value={answer.answer}
@@ -419,30 +413,40 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                                       )
                                     }
                                   />
+                                  <div className="flex flex-col md:flex-row md:justify-between items-center">
+                                    <div className="flex items-center justify-start">
+                                      <label
+                                        htmlFor={`correct-${questionIndex}-${answerIndex}`}
+                                        className="pr-[15px] text-md"
+                                      >
+                                        Is correct
+                                      </label>
 
-                                  <div className="mt-3 flex items-center justify-start">
-                                    <label
-                                      htmlFor={`correct-${questionIndex}-${answerIndex}`}
-                                      className="pr-[15px] text-md"
-                                    >
-                                      Is correct
-                                    </label>
+                                      <Switch.Root
+                                        id={`correct-${questionIndex}-${answerIndex}`}
+                                        aria-label={`Mark answer ${answerIndex + 1} as correct`}
+                                        className="relative h-5 w-10 rounded-full bg-gray-300 data-[state=checked]:bg-blue-600"
+                                        checked={answer.correct ?? false}
+                                        onCheckedChange={(checked) =>
+                                          handleAnswerCorrectToggle(
+                                            checked,
+                                            questionIndex,
+                                            answerIndex
+                                          )
+                                        }
+                                      >
+                                        <Switch.Thumb className="block h-4 w-4 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[22px]" />
+                                      </Switch.Root>
+                                    </div>
 
-                                    <Switch.Root
-                                      id={`correct-${questionIndex}-${answerIndex}`}
-                                      aria-label={`Mark answer ${answerIndex + 1} as correct`}
-                                      className="relative h-5 w-10 rounded-full bg-gray-300 data-[state=checked]:bg-blue-600"
-                                      checked={answer.correct ?? false}
-                                      onCheckedChange={(checked) =>
-                                        handleAnswerCorrectToggle(
-                                          checked,
-                                          questionIndex,
-                                          answerIndex
-                                        )
-                                      }
-                                    >
-                                      <Switch.Thumb className="block h-4 w-4 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[22px]" />
-                                    </Switch.Root>
+                                    <div className="max-w-sm">
+                                      <AlertButton
+                                        name="answer"
+                                        theme="red-text"
+                                        onClick={handleDeleteAnswer}
+                                        id = {`${questionIndex} ${answer.id}`}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               </Card>
