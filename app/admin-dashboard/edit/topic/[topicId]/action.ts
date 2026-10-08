@@ -43,11 +43,15 @@ export async function updateTopic(topicId: string, topic: Topic, questions: Ques
     isActive: topic.active,
   };
 
+  //Recently added questions and answers are given a temp id 
+  // that must be cleared before sending to the server
   const normalizedQuestions = questions.map((question) => ({
     ...question,
+    id: question.id?.startsWith("tempQuestionId-") ? null : question.id,
     isActive: question.active,
     answers: question.answers.map((answer) => (console.log("answers:", answer), {
       ...answer,
+      id: answer.id?.startsWith("tempAnswerId-") ? null : answer.id,
       isActive: answer.active,
       isCorrect: answer.correct,
     })),

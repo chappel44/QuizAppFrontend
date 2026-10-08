@@ -6,6 +6,7 @@ interface InputProps {
   value: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   label: string;
+  requiredInp?: boolean;
 }
 
 export default function Input({

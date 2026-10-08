@@ -12,6 +12,7 @@ import { ArrowLeft, ChevronUp, PlusIcon } from "lucide-react"
 import { updateTopic } from "./action"
 import AlertButton from "@/components/AlertButton"
 import Link from "next/link"
+import { toast } from "sonner"
 
 interface EditTopicProps {
   topic: Topic
@@ -85,7 +86,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
     setQuestions((questions: Question[]) => 
       [ ...questions,
         {
-          id: null,
+          id: `tempQuestionId-${crypto.randomUUID()}`,
           question: "",
           points: 1,
           imageUrl: "",
@@ -105,7 +106,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
             answers: [
               ...question.answers,
               {
-                id: null,
+                id: `tempAnswerId-${crypto.randomUUID()}`,
                 answer: "",
                 active: true,
                 correct: false
@@ -175,7 +176,6 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
 
   const handleDeleteQuestion = (e: React.MouseEvent<HTMLButtonElement>) => {
     const questionId = String(e.currentTarget.id)
-    console.log("Handling delete question id:", questionId)
     setQuestions((questions: any) => 
       questions.filter((question: Question) => question.id !== questionId) //Keep elements where question.id !== questionId is true otherwise remove 
     )
@@ -183,7 +183,6 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
 
   const handleDeleteAnswer= (e: React.MouseEvent<HTMLButtonElement>) => {
     const [questionIndex, answerId] = String(e.currentTarget.id).split(" ")
-
     setQuestions((questions: any) => 
       questions.map((question: Question, questIndex: number) =>
         Number(questionIndex) === questIndex
@@ -198,7 +197,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
   }
 
   return(
-    <div className="py-20 max-w-5xl flex mx-auto px-4">
+    <div className="py-20 max-w-5xl flex mx-auto px-2 md:px-4">
       <SectionCard>
         <Link
           href={`/admin-dashboard`}
@@ -274,7 +273,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                 ))}
               </RadioGroup.Root>
             </div>
-            {topic.topicType === "RANDOM_QUESTIONS" && <Input handleInputChange={handleTopicChange} value={topic.questionPoolSize?.toString() || "1"} name="questionPoolSize" label="Question pool size" />}
+            {topic.topicType === "RANDOM_QUESTIONS" && <Input handleInputChange={handleTopicChange} value={topic.questionPoolSize?.toString() || ""} name="questionPoolSize" label="Question pool size" />}
             <div className="flex flex-col text-gray-700">
               <label
                 htmlFor="dueDate"
@@ -312,7 +311,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
             className="overflow-hidden rounded-lg border border-blue-200 bg-white"
           >
             <AccordionTrigger
-              className="flex w-full cursor-pointer items-center justify-between px-4 py-3
+              className="flex w-full cursor-pointer items-center justify-between px-2 md:px-4 py-3
                         text-left transition-colors hover:bg-blue-50"
             >
               <div className="flex items-center gap-3">
@@ -337,7 +336,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
               />
             </AccordionTrigger>
 
-            <AccordionContent className="border-t border-blue-100 px-4 py-4 space-y-4">
+            <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-4">
               {questions.map((question: Question, questionIndex: number) => (
                 <Card key={question.id || "" + questionIndex}>
                   <div className="max-w-sm mb-4">
@@ -345,6 +344,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                       name="question"
                       onClick={handleDeleteQuestion}
                       id = {question.id}
+                      
                     />
                   </div>
                   <div className="space-y-2">
@@ -380,7 +380,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                         value={`answers-${questionIndex}`}
                         className="overflow-hidden rounded-lg border border-gray-100 shadow bg-white"
                       >
-                        <AccordionTrigger className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-200 bg-gray-200/30">
+                        <AccordionTrigger className="flex w-full cursor-pointer items-center justify-between px-2 md:px-4 py-3 text-left transition-colors hover:bg-gray-200 bg-gray-200/30">
                           <div className="flex flex-col">
                             <span className="font-medium text-gray-800">
                               Answers
@@ -394,7 +394,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                           <ChevronUp className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${questionAnswersOpen[questionIndex] ? "rotate-0" : 'rotate-180'}`} />
                         </AccordionTrigger>
 
-                        <AccordionContent className="border-t border-blue-100 px-4 py-4 space-y-4">
+                        <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-4">
                           {question.answers.map(
                             (answer: Answer, answerIndex: number) => (
                               <Card theme="gray">
@@ -413,7 +413,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                                       )
                                     }
                                   />
-                                  <div className="flex flex-col md:flex-row md:justify-between items-center">
+                                  <div className="flex flex-row justify-between items-center gap-2">
                                     <div className="flex items-center justify-start">
                                       <label
                                         htmlFor={`correct-${questionIndex}-${answerIndex}`}
@@ -439,7 +439,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                                       </Switch.Root>
                                     </div>
 
-                                    <div className="max-w-sm">
+                                    <div className="">
                                       <AlertButton
                                         name="answer"
                                         theme="red-text"
@@ -454,7 +454,7 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                           )}
                           <button
                             type="button"
-                            className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
+                            className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
                             onClick={() => handleAddAnswer(questionIndex)}
                             disabled={question.answers.length > 4}
                           >
@@ -480,11 +480,22 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
           </Accordion.Item>
           
         </Accordion.Root>
-        <div className="flex mx-auto w-md justify-center mt-4">
+        <div className="flex mx-auto justify-center mt-4">
           <AlertButton
             name="topic"
             theme="regular"
-            onClick={() => updateTopic(topic.id, topic, questions)}
+            onClick={ () => {
+              const callUpdateTopic = async () => {
+                const res = await updateTopic(topic.id, topic, questions)
+                if(res.success){
+                  toast.success("Topic updated successfully")
+                }
+                else{
+                  toast.error("Error updating topic")
+                }
+              }
+              callUpdateTopic();
+            }}
           />
         </div>
       </SectionCard>

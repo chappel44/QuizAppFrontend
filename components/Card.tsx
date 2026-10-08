@@ -34,7 +34,7 @@ export default function Card({
 
   return (
     <div
-      className={`flex ${directionClass} ${justifyClass} border ${themeClass} rounded-lg shadow p-4 ${
+      className={`flex ${directionClass} ${justifyClass} border ${themeClass} rounded-lg shadow p-2 md:p-4 ${
         hoverable
           ? "hover:scale-[1.01] transition-all duration-300 hover:bg-blue-50"
           : ""
