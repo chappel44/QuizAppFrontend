@@ -10,13 +10,17 @@ import { motion } from "framer-motion"
 import SectionCard from "@/components/SectionCard";
 import Card from "@/components/Card";
 
-type StudentDashboardLayoutProps = {
+type SectionOverviewProps = {
   sections: Section[] | undefined;
   role?: "STUDENT" | "ADMIN"
 };
 
-export default function StudentDashboardLayout({sections, role}: StudentDashboardLayoutProps) {
+export default function SectionOverview({sections, role}: SectionOverviewProps) {
   const [openSections, setOpenSections] = useState<boolean[]>(Array(sections?.length).fill(false))
+  
+  const sortedSections = sections && [...sections].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
 
   const handleOpenSectionChange = (index: number) => {
     setOpenSections((openSections: boolean[]) => {
@@ -29,7 +33,7 @@ export default function StudentDashboardLayout({sections, role}: StudentDashboar
   return (
     <div className="px-4">
       <div className="mx-auto flex w-full max-w-5xl flex-col space-y-4 text-gray-800">
-        {sections?.map((section: Section, index: number) => (
+        {sortedSections?.map((section: Section, index: number) => (
           <SectionCard key={section.id}>
             <Accordion.Root
               type = "multiple"
@@ -61,8 +65,17 @@ export default function StudentDashboardLayout({sections, role}: StudentDashboar
                       Topics
                     </h3>
 
+                    {role === "ADMIN" && 
+                      <a
+                        className="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer h-10 hover:bg-blue-600 w-full max-w-xs mx-auto flex justify-center items-center m-4"
+                        href={`/admin-dashboard/topic/create/${section.id}`}
+                      >
+                        Add Topic
+                      </a>
+                    }
+
                     <div className="space-y-8 border-l-2 border-blue-300 pl-4">
-                      {section.topics.map((topic: Topic, index: number) => (
+                      {section.topics?.map((topic: Topic, index: number) => (
                         <Card key = {topic.id} hoverable = {true}>
                           <div>
                             <p>Topic #{index + 1}</p>
@@ -79,7 +92,7 @@ export default function StudentDashboardLayout({sections, role}: StudentDashboar
                               </a>
                             ) : (
                               <a
-                                href={`/admin-dashboard/edit/topic/${topic.id}`}
+                                href={`/admin-dashboard/topic/${topic.id}/edit`}
                                 className="rounded bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 mt-2 cursor-pointer text-center"
                               >
                                 Edit Topic

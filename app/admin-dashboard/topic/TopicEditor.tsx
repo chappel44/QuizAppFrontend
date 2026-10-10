@@ -5,18 +5,20 @@ import { Topic, TopicType } from "@/app/student-dashboard/types"
 import Card from "@/components/Card"
 import Input from "@/components/Input"
 import SectionCard from "@/components/SectionCard"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Switch, RadioGroup, AlertDialog, Accordion } from "radix-ui"
 import { AccordionContent, AccordionTrigger } from "radix-ui/accordion"
 import { ArrowLeft, ChevronUp, PlusIcon } from "lucide-react"
-import { updateTopic } from "./action"
+import { updateTopic } from "@/lib/topic"
 import AlertButton from "@/components/AlertButton"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface EditTopicProps {
-  topic: Topic
-  questions: Question[]
+  topic?: Topic
+  questions?: Question[]
+  sectionId?: string
 }
 
 const topicTypes = [
@@ -34,12 +36,39 @@ const topicTypes = [
   }
 ]
 
-export default function EditTopic({topic: initialTopic, questions: initialQuestions} : EditTopicProps) {
-  const [topic, setTopic] = useState<Topic>(initialTopic);
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+export default function TopicEditor({topic: initialTopic, questions: initialQuestions, sectionId} : EditTopicProps) {
+  const [topic, setTopic] = useState<Topic>(
+    initialTopic || {
+      id: "",
+      createdAt: "",
+      name: "",
+      description: "",
+      dueDate: "",
+      active: false,
+      topicType: "QUIZ",
+      questions: [],
+      questionPoolSize: 1,
+      section: sectionId || "",
+    }
+  );
+
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions || []);
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [questionAnswersOpen, setQuestionAnswersOpen] = useState<boolean[]>(Array(initialQuestions?.length).fill(false))
   const [updating, setUpdating] = useState(false)
+  
+  const createdShown = useRef(false)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const created = searchParams.get("created");
+
+  useEffect(() => {
+    if (created && !createdShown.current) {
+      createdShown.current = true;
+      toast.success("Topic created");
+      router.replace(`/admin-dashboard/topic/${topic.id}/edit`);
+    }
+  }, [created, topic.id, router]);
 
   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = String(e.target.id)
@@ -344,7 +373,6 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
                       name="question"
                       onClick={handleDeleteQuestion}
                       id = {question.id}
-                      
                     />
                   </div>
                   <div className="space-y-2">
@@ -486,7 +514,8 @@ export default function EditTopic({topic: initialTopic, questions: initialQuesti
             theme="regular"
             onClick={ () => {
               const callUpdateTopic = async () => {
-                const res = await updateTopic(topic.id, topic, questions)
+                const res = await updateTopic(topic, questions)
+
                 if(res.success){
                   toast.success("Topic updated successfully")
                 }

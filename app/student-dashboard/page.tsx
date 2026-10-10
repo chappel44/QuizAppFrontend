@@ -1,5 +1,5 @@
 import { GetSectionOverview } from "./actions";
-import StudentDashboardLayout from "./StudentDashboardLayout";
+import StudentDashboardLayout from "./SectionOverview";
 import { preAuthorize } from "@/lib/auth";
 
 export default async function StudentDashboard(){

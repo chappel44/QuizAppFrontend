@@ -5,9 +5,9 @@ import type { Topic } from "@/app/student-dashboard/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-interface TopicResults {success: boolean, data: any}
+export interface Response {success: boolean, data: any}
 
-export async function getTopic(topicId: string): Promise<TopicResults> { 
+export async function getTopic(topicId: string): Promise<Response> { 
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
   if (!token) {
@@ -30,7 +30,7 @@ export async function getTopic(topicId: string): Promise<TopicResults> {
   return {success: true, data: {topic: body.data}};
 }
 
-export async function updateTopic(topicId: string, topic: Topic, questions: Question[]): Promise<TopicResults> { 
+export async function updateTopic(topic: Topic, questions: Question[]): Promise<Response> { 
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
   
@@ -57,23 +57,46 @@ export async function updateTopic(topicId: string, topic: Topic, questions: Ques
     })),
   }));
 
-  const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics?topicId=${topicId}`, { 
-    method: 'PATCH',
-    headers: 
-      { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
+  //Create new topic when id not present
+  if(topic.id == ""){ 
+    const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics?sectionId=${topic.section}`, { 
+      method: 'POST',
+      headers: 
+        { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({topic: normalizedTopic, questions: normalizedQuestions})
       },
-      body: JSON.stringify({topic: normalizedTopic, questions: normalizedQuestions})
-    },
-  );
+    );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch attempts"); 
+    if (!res.ok) {
+      throw new Error("Failed to fetch attempts"); 
+    }
+    const topicId = await res.text()
+
+    console.log("TOPIC ID", topicId)
+    redirect(`/admin-dashboard/topic/${topicId}/edit?created=${true}`)
   }
+  //Update topic when id present
+  else{
+    const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics?topicId=${topic.id}`, { 
+      method: 'PATCH',
+      headers: 
+        { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({topic: normalizedTopic, questions: normalizedQuestions})
+      },
+    );
 
-  const body = await res.json();
-  
+    if (!res.ok) {
+      throw new Error("Failed to fetch attempts"); 
+    }
 
-  return {success: true, data: {topic: body.data}};
+    const body = await res.json();
+
+    return {success: true, data: {topic: body.data}};
+  }
 }

@@ -4,7 +4,11 @@ export interface Section {
   id: string;
   name: string;
   description: string;
-  topics: Topic[]
+  topics: Topic[] | null;
+}
+
+export interface AdminSection extends Section {
+  isActive: boolean;
 }
 
 export type TopicType = "TEST" | "RANDOM_QUESTIONS" | "REVIEW" | "QUIZ"

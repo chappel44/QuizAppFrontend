@@ -1,7 +1,7 @@
 import { preAuthorize } from "@/lib/auth";
-import { getTopic } from "./action";
-import EditTopic from "./EditTopic";
+import { getTopic } from "@/lib/topic";
 import { Topic } from "@/app/student-dashboard/types";
+import TopicEditor from "../../TopicEditor";
 
 interface EditTopicPageProps {
   params: Promise<{ topicId: string }>;
@@ -15,5 +15,5 @@ export default async function EditTopicPage({params}: EditTopicPageProps){
   const questions = topic.questions;
   topic.questions = undefined
 
-  return <EditTopic topic = {topic} questions = {questions || []}/>
+  return <TopicEditor topic = {topic} questions = {questions || []}/>
 }
