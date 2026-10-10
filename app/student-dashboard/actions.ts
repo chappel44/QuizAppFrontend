@@ -33,7 +33,7 @@ export async function GetSectionOverview(): Promise<GetSectionOverviewResponse>{
       id: section.id,
       name: section.name,
       description: section.description,
-      topics: section.topics.map((topic: Topic) => ({
+      topics: section.topics?.map((topic: Topic) => ({
         id: topic.id,
         name: topic.name,
         description: topic.description
