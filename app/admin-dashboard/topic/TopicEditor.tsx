@@ -372,7 +372,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
   }
 
   return(
-    <div className="py-8 md:py-12 lg:py-20 max-w-5xl flex mx-auto px-2 md:px-4">
+    <div className="py-4 md:py-12 lg:py-20 max-w-5xl flex mx-auto px-2 md:px-4">
       <SectionCard>
         <Link
           href={`/admin-dashboard`}
