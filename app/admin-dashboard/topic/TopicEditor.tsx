@@ -292,7 +292,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     return(
       questions.map((question: Question, questionIndex: number) => (
         <Card key={question.id || "" + questionIndex}>
-          <div className="w-200 mb-4">
+          <div className="mb-4">
             <AlertButton
               name="question"
               onClick={handleDeleteQuestion}
@@ -420,7 +420,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                   </Tabs.Trigger>
                 </div>
               </div>
-              <Tabs.Content className="" value="topic">
+              <Tabs.Content value="topic">
                 <div className="space-y-3 lg:space-y-6">
                   <div className="flex justify-between w-full">
                     <AlertButton
