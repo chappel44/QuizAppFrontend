@@ -2,6 +2,8 @@ import React, { ChangeEvent } from "react";
 
 interface InputProps {
   children?: React.ReactNode
+  disabled? : boolean
+  type?: "text" | "password"
   name: string;
   value: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -11,6 +13,8 @@ interface InputProps {
 
 export default function Input({
   name,
+  disabled = false,
+  type = "text",
   value,
   handleInputChange,
   label,
@@ -25,12 +29,14 @@ export default function Input({
         {label}
       </label>
 
-      <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
+      <div className="bg-blue-50/60 border-blue-200 border rounded px-2 py-1 flex gap-2 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
         {children}
         <input
           onChange={handleInputChange}
           value={value}
           required
+          disabled={disabled}
+          type={type}
           id={name}
           name={name}
           className="focus:outline-none w-full"

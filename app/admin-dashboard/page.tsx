@@ -13,10 +13,10 @@ export default async function AdminDashboard(){
   }
 
   return (
-    <>
-      <h1 className="flex w-full justify-center py-20 text-4xl font-bold text-white">
+    <div className="py-4 md:py-8 lg:py-12">
+      {/* <h1 className="flex w-full justify-center py-20 text-4xl font-bold text-white">
         Admin Dashboard
-      </h1>
+      </h1> */}
       <div className="w-full bg-gray-100 mb-4 py-1 px-2 gap-4 mx-auto flex justify-center">
         <Popover.Root>
 		      <Popover.Trigger asChild>
@@ -35,6 +35,6 @@ export default async function AdminDashboard(){
         </Popover.Root>
       </div>
       <SectionOverview sections = {res.sections} role = "ADMIN"/>
-    </>
+    </div>
   )
 }

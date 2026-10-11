@@ -68,18 +68,23 @@ export default function Home() {
         <SectionCard>
           <div className="flex flex-col w-full items-center">
             <PlaneIcon className="w-15 h-15 bg-blue-200 p-1 rounded-full text-blue-400 border border-blue-400 mb-2"/>
-            <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight School {loginOpen ? "Login" : "Sign Up"}</h1>
+            <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight Accelerate {loginOpen ? "Login" : "Sign Up"}</h1>
             <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
           </div>
           <form
             onSubmit={(e) => handleSubmit(e)}
             className="space-y-2 w-full"
           >
-            
             <Input handleInputChange={handleInputChange} name="email" value={formData.email} label="Email">
               <AtSign className="text-blue-400" />
             </Input>
-            <Input handleInputChange={handleInputChange} name = "password" value={formData.password} label="Password">
+            <Input 
+              handleInputChange={handleInputChange} 
+              name = "password" 
+              value={formData.password} 
+              label="Password"
+              type= {showPassword ? "text" : "password"}
+            >
               { showPassword ?
                 <EyeOff onClick = {() => setShowPassword(false)} className="text-blue-400"/>
                 :

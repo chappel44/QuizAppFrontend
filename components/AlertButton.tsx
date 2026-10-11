@@ -1,7 +1,9 @@
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { Trash2Icon } from "lucide-react";
+import React from "react";
 
 interface AlertButtonProps {
+  children?: React.ReactNode;
   name: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   theme?: "destructive" | "regular" | "red-text";
@@ -9,6 +11,7 @@ interface AlertButtonProps {
 }
 
 export default function AlertButton({
+  children,
   name,
   onClick,
   theme = "destructive",
@@ -17,7 +20,7 @@ export default function AlertButton({
   const isDestructive = (theme === "destructive") || (theme === "red-text");
 
   const themeClass = {
-    destructive: `rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white
+    destructive: `rounded-md bg-red-700/80 px-4 py-2 text-sm font-medium text-white
                   shadow-md transition-colors
                   hover:bg-red-700
                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`,
@@ -27,21 +30,26 @@ export default function AlertButton({
                hover:bg-neutral-200
                focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`,
 
-    regular: `rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white
-              shadow-md transition-colors
-              hover:bg-blue-700
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`,
+  regular: `rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white
+            shadow-md transition-colors
+            hover:bg-blue-700
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`,
+  
   }[theme];
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger asChild>
-        <button
-          type="button"
-          className={`${themeClass} flex items-center gap-2 text-sm`}
-        >
-          {isDestructive ? <Trash2Icon className="p-1"/> : null}
-          {isDestructive ? "Delete" : "Confirm"} {name}
-        </button>
+        {children ?
+            children
+          :
+            <button
+              type="button"
+              className={`${themeClass} flex items-center gap-2 text-sm`}
+            >
+              {isDestructive ? <Trash2Icon className="p-1"/> : null}
+              {isDestructive ? "Delete" : "Confirm"} {name}
+            </button>
+        }
       </AlertDialog.Trigger>
 
       <AlertDialog.Portal>

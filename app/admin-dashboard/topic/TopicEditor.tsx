@@ -6,9 +6,9 @@ import Card from "@/components/Card"
 import Input from "@/components/Input"
 import SectionCard from "@/components/SectionCard"
 import { useEffect, useRef, useState } from "react"
-import { Switch, RadioGroup, AlertDialog, Accordion } from "radix-ui"
+import { Switch, RadioGroup, Tabs, Accordion } from "radix-ui"
 import { AccordionContent, AccordionTrigger } from "radix-ui/accordion"
-import { ArrowLeft, ChevronUp, PlusIcon } from "lucide-react"
+import { ArrowLeft, CheckIcon, ChevronUp, PlusIcon } from "lucide-react"
 import { updateTopic } from "@/lib/topic"
 import AlertButton from "@/components/AlertButton"
 import Link from "next/link"
@@ -53,7 +53,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
   );
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions || []);
-  const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<"topic" | "questions">("topic");
   const [questionAnswersOpen, setQuestionAnswersOpen] = useState<boolean[]>(Array(initialQuestions?.length).fill(false))
   const [updating, setUpdating] = useState(false)
   
@@ -236,146 +236,149 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
           Back to dashboard
         </Link>
         <Card>
-          <div className="space-y-6">
-            <div className="flex justify-between w-full">
-              <AlertButton
-                name="Topic"
-                onClick={handleDeleteTopic}
-              />
-              {/* TOGGLE TOPIC ACTIVE */}
-              <div className="flex items-center justify-end">
-                <label
-                  id="isActive"
-                  htmlFor="isActive"
-                  className="pr-[15px] text-md "
-                >
-                  Topic active
-                </label>
-
-                <Switch.Root
-                  id="isActive"
-                  aria-labelledby="isActive"
-                  className="h-5 w-10 rounded-full bg-gray-300 relative data-[state=checked]:bg-blue-600"
-                  checked = {topic.active}
-                  onCheckedChange={(checked) =>
-                    setTopic({
-                      ...topic,
-                      active: checked,
-                    })
-                  }
-                >
-                  <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
-                </Switch.Root>
-              </div>
-            </div>
-            <Input handleInputChange={handleTopicChange} value={topic.name} name="name" label="Topic name"/>
-            <Input handleInputChange={handleTopicChange} value={topic.description} name="description" label="Topic Description" />
-            <div>
-              <p className="text-sm text-gray-700/75">Topic Type</p>
-              <RadioGroup.Root
-                className="flex flex-col gap-3"
-                id="default"
-                aria-labelledby="view-density"
-                value={topic.topicType}
-                onValueChange={(value: TopicType) => {
-                  setTopic((prev: any) => ({
-                    ...prev,
-                    topicType: value,
-                  }));
-                }}
-              >
-                {topicTypes.map((topic, index) => (
-                  <div key={topic.label} className="flex items-center gap-2">
-                    <RadioGroup.Item
-                      className="h-5 w-5 rounded-full border border-blue-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 data-[state=checked]:border-blue-600 shadow-lg"
-                      value={topic.value}
-                      id={"topicType" + index}
-                    >
-                      <RadioGroup.Indicator className="flex items-center justify-center">
-                        <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />
-                      </RadioGroup.Indicator>
-                    </RadioGroup.Item>
-                    <label htmlFor={"topicType" + index} className="text-gray-700">
-                      {topic.label}
-                    </label>
-                  </div>
-                ))}
-              </RadioGroup.Root>
-            </div>
-            {topic.topicType === "RANDOM_QUESTIONS" && <Input handleInputChange={handleTopicChange} value={topic.questionPoolSize?.toString() || ""} name="questionPoolSize" label="Question pool size" />}
-            <div className="flex flex-col text-gray-700">
-              <label
-                htmlFor="dueDate"
-                className="text-sm text-gray-700/75"
-              >
-                Due Date
-              </label>
-
-              <div className="bg-blue-100 border-blue-300 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
-                <input
-                  type="datetime-local"
-                  id="dueDate"
-                  name="dueDate"
-                  value={topic.dueDate ?? ""}
-                  onChange={(e) =>
-                    setTopic((prev) => ({
-                      ...prev,
-                      dueDate: e.target.value,
-                    }))
-                  }
-                  className="focus:outline-none w-full"
-                />
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Accordion.Root
-          type="multiple"
-          onValueChange={() => setQuestionsOpen(!questionsOpen)}
-          className="mt-4"
-        >
-          <Accordion.Item
-            value="questions"
-            className="overflow-hidden rounded-lg border border-blue-200 bg-white"
+          <Tabs.Root 
+            className="TabsRoot" defaultValue="topic"
+            value={selectedTab} onValueChange={(e) => {
+              if(typeof(e) === "string" && (e == "topic" || e == "questions")){
+                setSelectedTab(e)
+              }
+            }}
           >
-            <AccordionTrigger
-              className="flex w-full cursor-pointer items-center justify-between px-2 md:px-4 py-3
-                        text-left transition-colors hover:bg-blue-50"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
-                  <span className="text-blue-700">?</span>
+            <Tabs.List className="TabsList" aria-label="Manage your account">
+              <div className="sticky top-2 z-10 w-full flex justify-between bg-blue-50 mb-2 md:mb-4 max-w-sm mx-auto h-13 shadow-md rounded-md">
+                <div 
+                  className={
+                    `w-1/2 flex justify-center transition-colors duration-200
+                    ${selectedTab === "topic" ? "text-blue-500 border-b-3 border-blue-400" : ""}
+                    `}
+                  >
+                  <Tabs.Trigger 
+                    value="topic"
+                    className="w-full h-full"
+                  >
+                    Topic
+                  </Tabs.Trigger>
                 </div>
 
-                <div>
-                  <p className="font-medium text-gray-800">
-                    Show Questions
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    View and edit the questions for this topic
-                  </p>
+                <div 
+                  className={
+                    `w-1/2 flex justify-center transition-colors duration-200
+                    ${selectedTab === "questions" ? "text-blue-500 border-b-3 border-blue-400" : ""
+                  }`}
+                >
+                  <Tabs.Trigger 
+                    value="questions"
+                    className="w-full h-full"
+                  >
+                    Questions
+                  </Tabs.Trigger>
                 </div>
               </div>
+              <Tabs.Content className="" value="topic">
+                <div className="space-y-3 lg:space-y-6">
+                  <div className="flex justify-between w-full">
+                    <AlertButton
+                      name="Topic"
+                      onClick={handleDeleteTopic}
+                    />
+                    {/* TOGGLE TOPIC ACTIVE */}
+                    <div className="flex items-center justify-end">
+                      <label
+                        id="isActive"
+                        htmlFor="isActive"
+                        className="pr-[15px] text-md "
+                      >
+                        Topic active
+                      </label>
 
-              <ChevronUp
-                className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
-                  questionsOpen ? "rotate-180" : "rotate-0"
-                }`}
-              />
-            </AccordionTrigger>
+                      <Switch.Root
+                        id="isActive"
+                        aria-labelledby="isActive"
+                        className="h-5 w-10 rounded-full bg-gray-300 relative data-[state=checked]:bg-blue-600"
+                        checked = {topic.active}
+                        onCheckedChange={(checked) =>
+                          setTopic({
+                            ...topic,
+                            active: checked,
+                          })
+                        }
+                      >
+                        <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                      </Switch.Root>
+                    </div>
+                  </div>
+                  <Input handleInputChange={handleTopicChange} value={topic.name} name="name" label="Topic name"/>
+                  <Input handleInputChange={handleTopicChange} value={topic.description} name="description" label="Topic Description" />
+                  <div>
+                    <p className="text-sm text-gray-700/75">Topic Type</p>
+                    <RadioGroup.Root
+                      className="flex flex-col gap-3"
+                      id="default"
+                      aria-labelledby="view-density"
+                      value={topic.topicType}
+                      onValueChange={(value: TopicType) => {
+                        setTopic((prev: any) => ({
+                          ...prev,
+                          topicType: value,
+                        }));
+                      }}
+                    >
+                      {topicTypes.map((topic, index) => (
+                        <div key={topic.label} className="flex items-center gap-2">
+                          <RadioGroup.Item
+                            className="h-5 w-5 rounded-full border border-blue-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 data-[state=checked]:border-blue-600 shadow-lg"
+                            value={topic.value}
+                            id={"topicType" + index}
+                          >
+                            <RadioGroup.Indicator className="flex items-center justify-center">
+                              <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+                            </RadioGroup.Indicator>
+                          </RadioGroup.Item>
+                          <label htmlFor={"topicType" + index} className="text-gray-700">
+                            {topic.label}
+                          </label>
+                        </div>
+                      ))}
+                    </RadioGroup.Root>
+                  </div>
+                  {topic.topicType === "RANDOM_QUESTIONS" && <Input handleInputChange={handleTopicChange} value={topic.questionPoolSize?.toString() || ""} name="questionPoolSize" label="Question pool size" />}
+                  <div className="flex flex-col text-gray-700">
+                    <label
+                      htmlFor="dueDate"
+                      className="text-sm text-gray-700/75"
+                    >
+                      Due Date
+                    </label>
 
-            <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-4">
-              {questions.map((question: Question, questionIndex: number) => (
+                    <div className="bg-blue-50/60 border-blue-200 border rounded px-2 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-blue-500">
+                      <input
+                        type="datetime-local"
+                        id="dueDate"
+                        name="dueDate"
+                        value={topic.dueDate ?? ""}
+                        onChange={(e) =>
+                          setTopic((prev) => ({
+                            ...prev,
+                            dueDate: e.target.value,
+                          }))
+                        }
+                        className="focus:outline-none w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Tabs.Content>
+              <Tabs.Content className="space-y-3 md:space-y-6" value="questions">
+                {questions.map((question: Question, questionIndex: number) => (
                 <Card key={question.id || "" + questionIndex}>
-                  <div className="max-w-sm mb-4">
+                  <div className="w-200 mb-4">
                     <AlertButton
                       name="question"
                       onClick={handleDeleteQuestion}
                       id = {question.id}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:space-y-6">
                     <Input value={question.question} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
                     <Input value={question.points.toString()} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
                     <Input value={question.imageUrl} name={`imageUrl ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Image Url" />
@@ -398,10 +401,10 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                         <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
                       </Switch.Root>
                     </div>
-                    <p className="mt-4">Answers:</p>
+                    <p className="mt-2 md:mt-4">Answers:</p>
                     <Accordion.Root 
                       type="multiple" 
-                      className="mt-4"
+                      className="mt-2 md:mt-4"
                       onValueChange={() => handleAnswerSectionOpenChange(questionIndex)}
                     >
                       <Accordion.Item
@@ -419,17 +422,21 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                             </span>
                           </div>
 
-                          <ChevronUp className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${questionAnswersOpen[questionIndex] ? "rotate-0" : 'rotate-180'}`} />
+                          <ChevronUp 
+                            className={`
+                              h-5 w-5 text-gray-500 transition-transform duration-200 
+                              ${questionAnswersOpen[questionIndex] ? "rotate-0" : 'rotate-180'}`
+                            } 
+                          />
                         </AccordionTrigger>
 
-                        <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-4">
+                        <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-3 md:space-y-6">
                           {question.answers.map(
                             (answer: Answer, answerIndex: number) => (
-                              <Card theme="gray">
-                                
+                              <Card key = {answer.id} theme="gray">
                                 <div
                                   key={answer.id|| "" + answerIndex}
-                                  className="mb-4 last:mb-0 space-y-4"
+                                  className="mb-4 last:mb-0 space-y-3 md:space-y-6"
                                 >
                                   <Input
                                     value={answer.answer}
@@ -482,7 +489,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                           )}
                           <button
                             type="button"
-                            className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
+                            className="mx-auto flex w-full  max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-green-600/70 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
                             onClick={() => handleAddAnswer(questionIndex)}
                             disabled={question.answers.length > 4}
                           >
@@ -503,12 +510,13 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                 <PlusIcon className="h-5 w-5" />
                 <span>Add Question</span>
               </button>
-            </AccordionContent>
-            
-          </Accordion.Item>
+              </Tabs.Content>
+            </Tabs.List>
+          </Tabs.Root>
           
-        </Accordion.Root>
-        <div className="flex mx-auto justify-center mt-4">
+        </Card>
+
+        <div className="flex mx-auto justify-center mt-4 sticky top-0 bottom-0 z-10">
           <AlertButton
             name="topic"
             theme="regular"
@@ -525,7 +533,17 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
               }
               callUpdateTopic();
             }}
-          />
+          >
+            <button 
+              className=" mx-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-100 px-4 py-2.5 font-medium text-blue-500 shadow-sm transition-all duration-200 hover:bg-blue-200 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:scale-102 hover:text-blue-600"
+            >
+              <CheckIcon />
+              { topic.id == "" 
+                ? "Create Topic" 
+                : "Update Topic"
+              }
+            </button>
+          </AlertButton>
         </div>
       </SectionCard>
     </div>
