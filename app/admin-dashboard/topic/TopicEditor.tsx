@@ -54,7 +54,6 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions || []);
   const [selectedTab, setSelectedTab] = useState<"topic" | "questions">("topic");
-  const [questionAnswersOpen, setQuestionAnswersOpen] = useState<boolean[]>(Array(initialQuestions?.length).fill(false))
   const [updating, setUpdating] = useState(false)
   
   const createdShown = useRef(false)
@@ -102,14 +101,6 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
       )
     );
   };
-
-  const handleAnswerSectionOpenChange = (index: number) => {
-    setQuestionAnswersOpen((questionAnswersOpen: boolean[]) => {
-      const updated = [...questionAnswersOpen]
-      updated[index] = !updated[index]
-      return updated
-    })
-  }
 
   const handleAddQuestion = () => {
     setQuestions((questions: Question[]) => 
@@ -225,6 +216,83 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     )
   }
 
+  const RenderQuestions = () => {
+    return(
+      questions.map((question: Question, questionIndex: number) => (
+        <Card key={question.id || "" + questionIndex}>
+          <div className="mb-4">
+            <AlertButton
+              name="question"
+              onClick={handleDeleteQuestion}
+              id = {question.id}
+            />
+          </div>
+          <div className="space-y-2 md:space-y-6">
+            <Input value={question.question} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
+            <Input value={question.points.toString()} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
+            <Input value={question.imageUrl} name={`imageUrl ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Image Url" />
+            <div className="flex items-center justify-start">
+              <label
+                id="active"
+                htmlFor="isActive"
+                className="pr-[15px] text-md "
+              >
+                Question active
+              </label>
+
+              <Switch.Root
+                id="active"
+                aria-labelledby="active"
+                className="h-5 w-10 rounded-full bg-gray-300 relative data-[state=checked]:bg-blue-600"
+                checked = {question.active}
+                onCheckedChange={(e) => handleQuestionToggle(e, questionIndex)}
+              >
+                <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+              </Switch.Root>
+            </div>
+            <p className="mt-2 md:mt-4">Answers:</p>
+            <Accordion.Root 
+              type="multiple" 
+              className="mt-2 md:mt-4"
+            >
+              <Accordion.Item
+                value={`answers-${questionIndex}`}
+                className="overflow-hidden rounded-lg border border-gray-100 shadow bg-white"
+              >
+                <AccordionTrigger className="group flex w-full cursor-pointer items-center justify-between px-2 md:px-4 py-3 text-left transition-colors hover:bg-gray-200 bg-gray-200/30">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800">
+                      Answers
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {question.answers.length} answer
+                      {question.answers.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  <ChevronUp className="h-5 w-5 text-gray-500 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </AccordionTrigger>
+
+                <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-3 md:space-y-6">
+                  <RenderAnswers questionIndex = {questionIndex} />
+                  <button
+                    type="button"
+                    className="mx-auto flex w-full  max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-green-600/70 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
+                    onClick={() => handleAddAnswer(questionIndex)}
+                    disabled={question.answers.length > 4}
+                  >
+                    <PlusIcon className="h-5 w-5" />
+                    <span>Add Answer</span>
+                  </button>
+                </AccordionContent>
+              </Accordion.Item>
+            </Accordion.Root>
+          </div>
+        </Card>
+      ))
+    )
+  }
+
   const RenderAnswers = ({questionIndex}: {questionIndex: number}) => {
     const question = questions[questionIndex] as Question
 
@@ -285,89 +353,6 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
           </Card>
         )
       ) 
-    )
-  }
-
-  const RenderQuestions = () => {
-    return(
-      questions.map((question: Question, questionIndex: number) => (
-        <Card key={question.id || "" + questionIndex}>
-          <div className="mb-4">
-            <AlertButton
-              name="question"
-              onClick={handleDeleteQuestion}
-              id = {question.id}
-            />
-          </div>
-          <div className="space-y-2 md:space-y-6">
-            <Input value={question.question} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
-            <Input value={question.points.toString()} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
-            <Input value={question.imageUrl} name={`imageUrl ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Image Url" />
-            <div className="flex items-center justify-start">
-              <label
-                id="active"
-                htmlFor="isActive"
-                className="pr-[15px] text-md "
-              >
-                Question active
-              </label>
-
-              <Switch.Root
-                id="active"
-                aria-labelledby="active"
-                className="h-5 w-10 rounded-full bg-gray-300 relative data-[state=checked]:bg-blue-600"
-                checked = {question.active}
-                onCheckedChange={(e) => handleQuestionToggle(e, questionIndex)}
-              >
-                <Switch.Thumb className="block h-4 w-4 rounded-full bg-white shadow transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
-              </Switch.Root>
-            </div>
-            <p className="mt-2 md:mt-4">Answers:</p>
-            <Accordion.Root 
-              type="multiple" 
-              className="mt-2 md:mt-4"
-              onValueChange={() => handleAnswerSectionOpenChange(questionIndex)}
-            >
-              <Accordion.Item
-                value={`answers-${questionIndex}`}
-                className="overflow-hidden rounded-lg border border-gray-100 shadow bg-white"
-              >
-                <AccordionTrigger className="flex w-full cursor-pointer items-center justify-between px-2 md:px-4 py-3 text-left transition-colors hover:bg-gray-200 bg-gray-200/30">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-800">
-                      Answers
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {question.answers.length} answer
-                      {question.answers.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  <ChevronUp 
-                    className={`
-                      h-5 w-5 text-gray-500 transition-transform duration-200 
-                      ${questionAnswersOpen[questionIndex] ? "rotate-0" : 'rotate-180'}`
-                    } 
-                  />
-                </AccordionTrigger>
-
-                <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-3 md:space-y-6">
-                  <RenderAnswers questionIndex = {questionIndex} />
-                  <button
-                    type="button"
-                    className="mx-auto flex w-full  max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-green-600/70 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
-                    onClick={() => handleAddAnswer(questionIndex)}
-                    disabled={question.answers.length > 4}
-                  >
-                    <PlusIcon className="h-5 w-5" />
-                    <span>Add Answer</span>
-                  </button>
-                </AccordionContent>
-              </Accordion.Item>
-            </Accordion.Root>
-          </div>
-        </Card>
-      ))
     )
   }
 
