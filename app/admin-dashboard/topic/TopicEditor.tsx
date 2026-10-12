@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react"
 import { Switch, RadioGroup, Tabs, Accordion } from "radix-ui"
 import { AccordionContent, AccordionTrigger } from "radix-ui/accordion"
 import { ArrowLeft, CheckIcon, ChevronUp, PlusIcon } from "lucide-react"
-import { updateTopic } from "@/lib/topic"
+import { deleteTopic, updateTopic } from "@/lib/topic"
 import AlertButton from "@/components/AlertButton"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -44,7 +44,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
       name: "",
       description: "",
       dueDate: "",
-      active: false,
+      active: true,
       topicType: "QUIZ",
       questions: [],
       questionPoolSize: 1,
@@ -190,8 +190,33 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     );
   }
 
-  const handleDeleteTopic = () => {
-    console.log("DELETING TOPIC")
+  const handleDeleteTopic = async () => {
+    const res = await deleteTopic(topic.id);
+
+    if(res.success) {
+      toast.success("Topic successfully deleted, You will be redirected in 3 seconds")
+
+      setTopic({
+        id: "",
+        createdAt: "",
+        name: "",
+        description: "",
+        dueDate: "",
+        active: true,
+        topicType: "QUIZ",
+        questions: [],
+        questionPoolSize: 1,
+        section: sectionId || "",
+      })
+      setQuestions([])
+
+      setTimeout(() => {
+        window.location.href = "/admin-dashboard"
+      }, 3000)
+    }
+    else {
+      toast.error(`${res.error}`)
+    }
   }
 
   const handleDeleteQuestion = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -216,8 +241,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     )
   }
 
-  const RenderQuestions = () => {
-    return(
+  const renderQuestions = () => 
       questions.map((question: Question, questionIndex: number) => (
         <Card key={question.id || "" + questionIndex}>
           <div className="mb-4">
@@ -274,7 +298,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                 </AccordionTrigger>
 
                 <AccordionContent className="border-t border-blue-100 px-2 md:px-4 py-4 space-y-3 md:space-y-6">
-                  <RenderAnswers questionIndex = {questionIndex} />
+                  {renderAnswers(questionIndex)}
                   <button
                     type="button"
                     className="mx-auto flex w-full  max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-green-600/70 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
@@ -290,18 +314,15 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
           </div>
         </Card>
       ))
-    )
-  }
+  
 
-  const RenderAnswers = ({questionIndex}: {questionIndex: number}) => {
+  const renderAnswers = (questionIndex: number) => {
     const question = questions[questionIndex] as Question
-
     return (
       question.answers.map(
         (answer: Answer, answerIndex: number) => (
           <Card key = {answer.id} theme="gray">
             <div
-              key={answer.id|| "" + answerIndex}
               className="mb-4 last:mb-0 space-y-3 md:space-y-6"
             >
               <Input
@@ -408,10 +429,12 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
               <Tabs.Content value="topic">
                 <div className="space-y-3 lg:space-y-6">
                   <div className="flex justify-between w-full">
-                    <AlertButton
-                      name="Topic"
-                      onClick={handleDeleteTopic}
-                    />
+                    { topic.id != "" && 
+                      <AlertButton
+                        name="Topic"
+                        onClick={handleDeleteTopic}
+                      />
+                    }
                     {/* TOGGLE TOPIC ACTIVE */}
                     <div className="flex items-center justify-end">
                       <label
@@ -500,7 +523,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
                 </div>
               </Tabs.Content>
               <Tabs.Content className="space-y-3 md:space-y-6" value="questions">
-              <RenderQuestions />
+              {renderQuestions()}
               <button
                 type="button"
                 className="mx-auto flex w-1/2 max-w-xl cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

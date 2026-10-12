@@ -7,6 +7,10 @@ import { redirect } from "next/navigation";
 
 export interface Response {success: boolean, data: any}
 
+type DeleteTopicResult =
+  | { success: true }
+  | { success: false; error: string };
+
 export async function getTopic(topicId: string): Promise<Response> { 
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
@@ -75,7 +79,6 @@ export async function updateTopic(topic: Topic, questions: Question[]): Promise<
     }
     const topicId = await res.text()
 
-    console.log("TOPIC ID", topicId)
     redirect(`/admin-dashboard/topic/${topicId}/edit?created=${true}`)
   }
   //Update topic when id present
@@ -98,5 +101,43 @@ export async function updateTopic(topic: Topic, questions: Question[]): Promise<
     const body = await res.json();
 
     return {success: true, data: {topic: body.data}};
+  }
+}
+
+export async function deleteTopic(topicId: string): Promise<DeleteTopicResult> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const url = new URL(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics`);
+  url.searchParams.set("topicId", topicId);
+
+  try {
+    const res = await fetch(url.toString(), {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      return {
+        success: false,
+        error: body?.message ?? `Request failed with status ${res.status}`,
+      };
+    }
+
+    return {success: true}
+    
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Network error",
+    };
   }
 }
