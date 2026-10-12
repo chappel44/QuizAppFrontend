@@ -15,6 +15,8 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sidebar } from "@/components/SideBar"
+import GenerateQuiz from "@/components/GenerateQuiz"
+import { generateTempAnswerId, generateTempQuestionId } from "@/lib/tempId"
 
 interface EditTopicProps {
   topic?: Topic
@@ -112,7 +114,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     setQuestions((questions: Question[]) => 
       [ ...questions,
         {
-          id: `tempQuestionId-${crypto.randomUUID()}`,
+          id: generateTempQuestionId(),
           question: "",
           points: 1,
           imageUrl: "",
@@ -132,7 +134,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
             answers: [
               ...question.answers,
               {
-                id: `tempAnswerId-${crypto.randomUUID()}`,
+                id: generateTempAnswerId(),
                 answer: "",
                 active: true,
                 correct: false
@@ -425,6 +427,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
           <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
           Back to dashboard
         </Link>
+        <GenerateQuiz setTopic={setTopic} setQuestions={setQuestions}/>
         <Card>
           <Tabs.Root 
             className="TabsRoot" defaultValue="topic"
