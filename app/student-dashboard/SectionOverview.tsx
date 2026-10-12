@@ -3,24 +3,27 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from "radix-ui/accordion";
 import { Section, Topic } from "./types"
 import { Accordion } from "radix-ui";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { ChevronDown, ChevronUp, Pen, PlusIcon } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { motion } from "framer-motion"
 import SectionCard from "@/components/SectionCard";
 import Card from "@/components/Card";
+import Input from "@/components/Input";
 
 type SectionOverviewProps = {
-  sections: Section[] | undefined;
+  initialSections: Section[] | undefined;
   role?: "STUDENT" | "ADMIN"
 };
 
-export default function SectionOverview({sections, role}: SectionOverviewProps) {
-  const [openSections, setOpenSections] = useState<boolean[]>(Array(sections?.length).fill(false))
-  
-  const sortedSections = sections && [...sections].sort((a, b) => 
-    a.name.localeCompare(b.name)
-  );
+export default function SectionOverview({initialSections, role}: SectionOverviewProps) {
+  const [openSections, setOpenSections] = useState<boolean[]>(Array(initialSections?.length).fill(false))
+  const [editingSection, setEditingSection] = useState<boolean[]>(Array(initialSections?.length).fill(false))
+  const [sections, setSections] = useState<Section>(initialSections ?? []);
+
+  // const sortedSections = initialSections && [...initialSections].sort((a, b) => 
+  //   a.name.localeCompare(b.name)
+  // );
 
   const handleOpenSectionChange = (index: number) => {
     setOpenSections((openSections: boolean[]) => {
@@ -30,29 +33,80 @@ export default function SectionOverview({sections, role}: SectionOverviewProps) 
     })
   }
 
+  const handleSectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const [attribute, sectionId] = e.target.id.split(" ");
+    console.log(attribute)
+    console.log(sectionId)
+    setSections((prev: any) =>
+      prev.map((section: Section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              [attribute]: e.target.value,
+            }
+          : section
+      )
+    );
+
+  }
+
   return (
     <div className="px-4">
       <div className="mx-auto flex w-full max-w-5xl flex-col space-y-4 text-gray-800">
-        {sortedSections?.map((section: Section, index: number) => (
+        {sections?.map((section: Section, index: number) => (
           <SectionCard key={section.id}>
             <Accordion.Root
               type = "multiple"
               onValueChange={() => handleOpenSectionChange(index)}
             >
-              <Accordion.Item key = {section.id} value={section.id}>
-                <AccordionTrigger
-                  className="w-full cursor-pointer"
-                >
-                  <div className="flex justify-between">
-                    <div className="flex flex-col">
-                      <h2 className="text-2xl font-semibold">{section.name}</h2>
+              <Accordion.Item key={section.id} value={section.id}>
+                <div className="flex items-start justify-between">
+                  <AccordionTrigger className="flex-1">
+                    <div className="text-left">
+                      <h2 className="text-2xl font-semibold">
+                        {section.name}
+                      </h2>
                       <p className="mt-1 text-sm text-gray-600">
                         {section.description}
                       </p>
                     </div>
-                    <ChevronUp className={` transition-all duration-200 ${openSections[index] ? "rotate-180" : "rotate-0"}`} />
+                  </AccordionTrigger>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingSection(prev => ({
+                          ...prev,
+                          [index]: !prev[index],
+                        }));
+                      }}
+                      className="ml-3"
+                    >
+                      Edit
+                    </button>
+
+                    <ChevronUp className={`transition-transform ${openSections[index] ? "duration-300" : "rotate-180 duration-0"}`} />
                   </div>
-                </AccordionTrigger>
+                </div>
+
+                {editingSection[index] && (
+                  <div className="space-y-3 p-4">
+                    <Input
+                      label="Name"
+                      name={`name ${section.id}`}
+                      value={section.name}
+                      handleInputChange={handleSectionChange}
+                    />
+
+                    <Input
+                      label="Description"
+                      name={`description ${section.id}`}
+                      value={section.description}
+                      handleInputChange={handleSectionChange}
+                    />
+                  </div>
+                )}
                 <AccordionContent>
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
@@ -67,9 +121,13 @@ export default function SectionOverview({sections, role}: SectionOverviewProps) 
 
                     {role === "ADMIN" && 
                       <a
-                        className="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer h-10 hover:bg-blue-600 w-full max-w-xs mx-auto flex justify-center items-center m-4"
+                        className="mb-4 mx-auto flex w-full  max-w-xl cursor-pointer items-center justify-center gap-2 
+                        rounded-lg bg-purple-600/70 px-2 md:px-4 py-2.5 font-medium text-white shadow-sm 
+                        transition-all duration-200 hover:bg-purple-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:hover:bg-gray-300 disabled:active:scale-100 disabled:focus:ring-0"
+
                         href={`/admin-dashboard/topic/create/${section.id}`}
                       >
+                        <PlusIcon />
                         Add Topic
                       </a>
                     }
