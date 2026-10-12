@@ -67,7 +67,7 @@ export default function Home() {
       <div className="flex flex-col justify-center px-4 w-lg">
         <SectionCard>
           <div className="flex flex-col w-full items-center">
-            <PlaneIcon className="w-15 h-15 bg-blue-200 p-1 rounded-full text-blue-400 border border-blue-400 mb-2"/>
+            <img src = "/apple-icon.png" className="w-15 h-15 mb-2 rounded-full"/>
             <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight Accelerate {loginOpen ? "Login" : "Sign Up"}</h1>
             <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
           </div>

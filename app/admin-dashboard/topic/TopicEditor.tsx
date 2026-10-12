@@ -24,16 +24,16 @@ interface EditTopicProps {
 
 const topicTypes = [
   {
-    label: "Random Questions",
-    value: "RANDOM_QUESTIONS"
+    label: "Quiz",
+    value: "QUIZ"
   },
   {
     label: "Test",
     value: "TEST"
   },
   {
-    label: "Quiz",
-    value: "QUIZ"
+    label: "Random Questions",
+    value: "RANDOM_QUESTIONS"
   }
 ]
 
