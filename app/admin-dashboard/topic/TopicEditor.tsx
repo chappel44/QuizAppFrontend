@@ -14,6 +14,7 @@ import AlertButton from "@/components/AlertButton"
 import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter, useSearchParams } from "next/navigation";
+import { Sidebar } from "@/components/SideBar"
 
 interface EditTopicProps {
   topic?: Topic
@@ -54,6 +55,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions || []);
   const [selectedTab, setSelectedTab] = useState<"topic" | "questions">("topic");
+  const [questionNavigationOpen, setQuestionNavigationOpen] = useState(selectedTab === "questions")
   const [updating, setUpdating] = useState(false)
   
   const createdShown = useRef(false)
@@ -68,6 +70,10 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
       router.replace(`/admin-dashboard/topic/${topic.id}/edit`);
     }
   }, [created, topic.id, router]);
+
+  useEffect(() => {
+    setQuestionNavigationOpen(selectedTab === "questions" && questions.length > 0)
+  }, [selectedTab, questions.length])
 
   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = String(e.target.id)
@@ -243,7 +249,7 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
 
   const renderQuestions = () => 
       questions.map((question: Question, questionIndex: number) => (
-        <Card key={question.id || "" + questionIndex}>
+        <Card key={question.id || questionIndex} id={`${question.id}`}>
           <div className="mb-4">
             <AlertButton
               name="question"
@@ -377,8 +383,40 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
     )
   }
 
+  const scrollQuestionToView = (questionId: string) => {
+    document
+      .getElementById(`${questionId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return(
-    <div className="py-4 md:py-12 lg:py-20 max-w-5xl flex mx-auto px-2 md:px-4">
+    <div className=
+      {`py-4 md:py-12 lg:py-20 flex mx-auto px-2 md:px-4
+        ${questionNavigationOpen ? "max-w-7xl" : "max-w-5xl"}
+      `}
+    >
+      <Sidebar open={questionNavigationOpen}>
+        <h2 className="mb-3 font-semibold text-gray-800">Questions</h2>
+        <nav className="space-y-2 text-sm text-gray-600">
+          {/* your sidebar content */}
+          <div className="flex flex-col space-y-3 md:space-y-6">
+            { questions.map((question: Question, questionIndex: number) => 
+              <button
+                key={`side-question-${question.id}`}
+                className="text-left cursor-pointer"
+                onClick={() => scrollQuestionToView(question.id || "")}
+              >
+                <Card hoverable={true}>
+                  <p className="text-xs">
+                    <span className="font-semibold text-md">Question:{questionIndex + 1}</span> <br />
+                    {question.question}
+                  </p>
+                </Card>
+              </button>
+            )}
+          </div>
+        </nav>
+      </Sidebar>
       <SectionCard>
         <Link
           href={`/admin-dashboard`}

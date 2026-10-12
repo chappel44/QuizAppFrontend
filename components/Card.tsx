@@ -6,6 +6,7 @@ interface CardProps {
   direction?: "row" | "col";
   justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
   theme? : "light" | "gray" 
+  id?: string;
 }
 
 export default function Card({
@@ -13,7 +14,8 @@ export default function Card({
   hoverable = false,
   direction = "col",
   justify = "start",
-  theme = "light"
+  theme = "light",
+  id
   
 }: CardProps) {
   const directionClass = direction === "row" ? "flex-row" : "flex-col";
@@ -34,6 +36,7 @@ export default function Card({
 
   return (
     <div
+      id={id}
       className={`flex ${directionClass} ${justifyClass} border ${themeClass} rounded-lg shadow p-2 md:p-4 ${
         hoverable
           ? "hover:scale-[1.01] transition-all duration-300 hover:bg-blue-50"
