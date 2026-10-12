@@ -67,9 +67,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No output" }, { status: 502 });
   }
 
-  console.log("TOOL USE INPUT", toolUse.input)
+  const toolBlock = response.content.find(
+    (block) =>
+      block.type === "tool_use" &&
+      block.name === "create_topic"
+  );
 
-  // toolUse.input is already parsed JSON. Validate it with Zod,
-  // then merge sectionId, dueDate, topicType, etc. server-side.
-  return NextResponse.json(toolUse.input);
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    return NextResponse.json(
+      { error: "No create_topic tool call found" },
+      { status: 500 }
+    );
+  }
+
+  // toolBlock.input is the parsed tool input
+  const topic = toolBlock.input;
+
+  // Validate topic with Zod and merge server-side fields here.
+
+  return NextResponse.json(topic);
 }
