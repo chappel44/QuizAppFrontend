@@ -4,6 +4,7 @@ export interface Section {
   id: string;
   name: string;
   description: string;
+  active: boolean;
   topics: Topic[] | null;
 }
 

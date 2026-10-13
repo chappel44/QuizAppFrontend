@@ -3,13 +3,18 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from "radix-ui/accordion";
 import { Section, Topic } from "./types"
 import { Accordion } from "radix-ui";
-import { ChevronDown, ChevronUp, Pen, PlusIcon } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
+import { ChevronUp, PlusIcon, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import { motion } from "framer-motion"
 import SectionCard from "@/components/SectionCard";
 import Card from "@/components/Card";
 import Input from "@/components/Input";
+import { deleteSection, updateSection } from "@/lib/sections";
+import { SectionFormData } from "@/components/SectionForm";
+import { toast } from "sonner";
+import AlertButton from "@/components/AlertButton";
+import { section } from "framer-motion/client";
 
 type SectionOverviewProps = {
   initialSections: Section[] | undefined;
@@ -19,11 +24,13 @@ type SectionOverviewProps = {
 export default function SectionOverview({initialSections, role}: SectionOverviewProps) {
   const [openSections, setOpenSections] = useState<boolean[]>(Array(initialSections?.length).fill(false))
   const [editingSection, setEditingSection] = useState<boolean[]>(Array(initialSections?.length).fill(false))
-  const [sections, setSections] = useState<Section>(initialSections ?? []);
-
-  // const sortedSections = initialSections && [...initialSections].sort((a, b) => 
-  //   a.name.localeCompare(b.name)
-  // );
+  initialSections = initialSections && [...initialSections].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
+  const [sections, setSections] = useState<Section[]>(initialSections ?? []);
+  const [updating, setUpdating] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const handleOpenSectionChange = (index: number) => {
     setOpenSections((openSections: boolean[]) => {
@@ -33,8 +40,90 @@ export default function SectionOverview({initialSections, role}: SectionOverview
     })
   }
 
+  const handleSectionDelete = async (sectionId: string) => {
+    try {
+      setDeleting(true)
+      if(!sectionId){
+        setDeleting(false)
+        return
+      }
+
+      const res = await deleteSection(sectionId)
+
+      if(res.success){
+        toast.success("Section deleted")
+        setSections((prevSections: Section[]) =>
+          prevSections.filter((prevSection: Section) => 
+            prevSection.id !== sectionId
+          )
+        )
+      }
+      else toast.error("Failed to delete section")      
+    }
+    catch(err){
+      toast.error("Something went wrong") 
+    }
+    finally{
+      setDeleting(false)
+    }
+  }
+
+  const handleSectionUpdate = async (section: Section, index: number) => {
+    const originalSection = initialSections?.find(
+      (prevSection) => prevSection.id === section.id
+    );
+
+    if (!originalSection) return;
+
+    if (section.name.trim() === "" || section.description.trim() === "") {
+      return;
+    }
+
+    if (
+      originalSection.name === section.name &&
+      originalSection.description === section.description &&
+      originalSection.active === section.active
+    ) {
+      toggleEditingSection(index);
+      return;
+    }
+
+    originalSection.name = section.name
+    originalSection.description = section.description
+    originalSection.active = section.active
+
+    const sectionData: SectionFormData = {
+      name: section.name,
+      description: section.description,
+      isActive: section.active,
+    };
+
+    try {
+      setUpdating(true);
+
+      const res = await updateSection(section.id, sectionData);
+
+      if (res.success) {
+        toast.success("Section updated");
+        toggleEditingSection(index);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (error) {
+      toast.error("Failed to update section");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const toggleEditingSection = (index: number) => {
+    setEditingSection(prev => ({
+      ...prev,
+      [index]: !prev[index],
+    }))
+  }
+
   const handleSectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    
     const [attribute, sectionId] = e.target.id.split(" ");
     console.log(attribute)
     console.log(sectionId)
@@ -48,7 +137,6 @@ export default function SectionOverview({initialSections, role}: SectionOverview
           : section
       )
     );
-
   }
 
   return (
@@ -72,20 +160,32 @@ export default function SectionOverview({initialSections, role}: SectionOverview
                       </p>
                     </div>
                   </AccordionTrigger>
+
                   <div className="flex items-center gap-4">
+                    { role === "ADMIN" &&
                     <button
                       type="button"
                       onClick={() => {
-                        setEditingSection(prev => ({
-                          ...prev,
-                          [index]: !prev[index],
-                        }));
+                        { editingSection[index]
+                          ?
+                          handleSectionUpdate(sections[index], index)
+                          :
+                          toggleEditingSection(index)
+                        }
                       }}
-                      className="ml-3"
+                      className="ml-3 bg-blue-500 text-white px-2 md:px-4 py-1 md:py-2 rounded whitespace-nowrap"
                     >
-                      Edit
+                      {editingSection[index] ? updating ? "Updating..." : "Save changes" : "Edit Section"}
                     </button>
-
+                    }
+                    { role === "ADMIN" && 
+                      <AlertButton
+                        name="section"
+                        onClick={() => handleSectionDelete(section.id)}
+                        theme="destructive"
+                        loading = {deleting}
+                      />
+                    }
                     <ChevronUp className={`transition-transform ${openSections[index] ? "duration-300" : "rotate-180 duration-0"}`} />
                   </div>
                 </div>

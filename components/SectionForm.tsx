@@ -3,23 +3,19 @@
 import React, { useState } from "react";
 import Card from "./Card";
 import Input from "./Input";
-import { addSection } from "@/app/admin-dashboard/actions";
 import { toast } from "sonner";
-import { AdminSection } from "@/app/student-dashboard/types";
-
+import { addSection } from "@/lib/sections";
 export interface SectionFormData {
   name: string;
   description: string;
+  isActive: boolean;
 }
-
-// interface SectionFormProps {
-//   updateSections: (section: AdminSection) => void
-// }
 
 export default function SectionForm(){
   const [formData, setFormData] = useState<SectionFormData>({
     name: "",
-    description: ""
+    description: "",
+    isActive: true
   });
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
