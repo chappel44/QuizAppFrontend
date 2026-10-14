@@ -68,7 +68,7 @@ export default function Home() {
         <SectionCard>
           <div className="flex flex-col w-full items-center">
             <img src = "/apple-icon.png" className="w-15 h-15 mb-2 rounded-full"/>
-            <h1 className="text-black/90 font-semibold text-2xl mb-1">Flight Accelerate {loginOpen ? "Login" : "Sign Up"}</h1>
+            <h1 className="text-black/90 font-semibold text-2xl mb-1">Fact Forge {loginOpen ? "Login" : "Sign Up"}</h1>
             <p className="flex flex-col text-black/60 mb-2">Sign in to take assessments</p>
           </div>
           <form
