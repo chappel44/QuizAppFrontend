@@ -16,7 +16,6 @@ export default function Card({
   justify = "start",
   theme = "light",
   id
-  
 }: CardProps) {
   const directionClass = direction === "row" ? "flex-row" : "flex-col";
 

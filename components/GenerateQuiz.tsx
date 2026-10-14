@@ -8,6 +8,8 @@ import { Dispatch, SetStateAction } from "react";
 import { Answer, Question } from "@/app/student-dashboard/attempts/[attemptId]/types";
 import { Topic } from "@/app/student-dashboard/types";
 import { generateTempAnswerId, generateTempQuestionId } from "@/lib/tempId";
+import { ThinkingSpark } from "./ThinkingSpark";
+import { ThinkingScreen } from "./ThinkingScreen";
 
 interface GenerateQuizProps {
   setQuestions: Dispatch<SetStateAction<Question[]>>;
@@ -17,6 +19,7 @@ interface GenerateQuizProps {
 export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps) {
   const [file, setFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(true)
 
   async function handleGenerate() {
     let documentText: string | undefined;
@@ -24,6 +27,8 @@ export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps
     if (file) {
       documentText = await file.text();
     }
+
+    setLoading(true)
 
     const res = await fetch("/api/admin/generate-topic", {
       method: "POST",
@@ -35,6 +40,8 @@ export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps
         documentText,
       }),
     });
+
+    setLoading(false)
 
     if (!res.ok) {
       throw new Error("Failed to generate quiz");
@@ -71,23 +78,30 @@ export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps
   return (
     <div className="mb-4">
       <Card>
-        <input
-          type="file"
-          accept=".txt,text/plain,.pdf"
-          onChange={(e) =>
-            setFile(e.target.files?.[0] ?? null)
-          }
-        />
+        {
+          loading ? 
+          <ThinkingScreen />
+          :
+          <div className="flex justify-start flex-col space-y-4">
+            <input
+              type="file"
+              accept=".txt,text/plain,.pdf"
+              onChange={(e) =>
+                setFile(e.target.files?.[0] ?? null)
+              }
+            />
 
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="What kind of quiz should be generated?"
-        />
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="What kind of quiz should be generated?"
+            />
 
-        <button onClick={handleGenerate}>
-          Generate quiz
-        </button>
+            <button onClick={handleGenerate}>
+              Generate quiz
+            </button>
+          </div>
+        }
       </Card>
     </div>
   );
