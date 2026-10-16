@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flight Accelerate",
+  title: "Fact Forge",
   description:
-  "Create and manage quizzes, build assessments, and track student performance with Flight Accelerate, an intuitive platform for educators.",
+  "Create and manage quizzes, build assessments, and track student performance with Fact Forge, an intuitive platform for educators.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
