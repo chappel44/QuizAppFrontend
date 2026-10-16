@@ -10,6 +10,8 @@ import { redirect, useSearchParams } from "next/navigation";
 import { Topic } from "../../types";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ConfirmSubmitDialog } from "@/components/ConfirmSubmitDialog";
+import * as Toolbar from '@radix-ui/react-toolbar';
+
 import Link from "next/link";
 interface AttemptLayoutProps {
   attemptQuestionsTemp: AttemptQuestion[];
@@ -19,7 +21,7 @@ interface AttemptLayoutProps {
 
 export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic} : AttemptLayoutProps) {
   const topicId = topic.id
-  const [attemptQuestions, setAttemptQuestions] = useState<AttemptQuestion[]>([]);
+  const [attemptQuestions, setAttemptQuestions] = useState<AttemptQuestion[]>(attemptQuestionsTemp, );
   const [attempt, setAttempt] = useState<Attempt>();
   const [showConfirm, setShowConfirm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -141,6 +143,15 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
       [questionId]: answerId
     }))
   }
+
+  const handleGoToNext = () => {
+    if (activeQuestion + 1 === attemptQuestions.length) {
+      redirect(`/student-dashboard/attempts?topicId=${topicId}`);
+      return;
+    }
+    handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId);
+  };
+
 
   const DisplayChoices = () => {
     const currentQuestion = attemptQuestions[activeQuestion];
@@ -322,17 +333,18 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
         </div>
       </>
     );
-  };
+  };  
 
   useEffect(() => {
-    setAttemptQuestions([...attemptQuestionsTemp,
-      { //Create this dummy which is used to show final progress
-        id: "",
-        isCorrect: null,
-        submittedAnswerId: "",
-      } as AttemptQuestion
-    ])
-
+    if(attemptQuestionsTemp.length){
+      setAttemptQuestions([...attemptQuestionsTemp,
+        {
+          id: "",
+          isCorrect: null,
+          submittedAnswerId: "",
+        } as AttemptQuestion
+      ])
+    }
     setAttempt(attemptTemp)
     const submittedAnswers: Record<string, string | null> = {};
 
@@ -377,26 +389,47 @@ export default function AttemptLayout({attemptQuestionsTemp, attemptTemp, topic}
           
           {/* Answer Display */}
           <DisplayChoices />
-          <div className="w-full justify-between flex">
-            <button 
-              className={leftArrowDisabled ? "invisible" : `rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2`}
-              onClick={() => setActiveQuestion(activeQuestion-1)}
-              disabled = {leftArrowDisabled}
-            >
-              <ArrowLeft/> Prev
-            </button>
-            <button 
-              className={`rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2`}
-              onClick={() => {
-                if(activeQuestion+1 === attemptQuestions.length)
-                  redirect(`/student-dashboard/attempts?topicId=${topicId}`)
+          <Toolbar.Root 
+            className="w-full justify-between flex" 
+            orientation="horizontal"
+            aria-label="Question navigation"
+            // Intercept keys here to trigger actions directly
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight') {
+                e.preventDefault(); // Stop Radix from just moving focus outlines
+                handleGoToNext();
+              } else if (e.key === 'ArrowLeft' && !leftArrowDisabled) {
+                e.preventDefault();
+                setActiveQuestion(activeQuestion - 1);
+              }
+            }}
+          >
+            {/* PREVIOUS BUTTON */}
+            <Toolbar.Button asChild disabled={leftArrowDisabled}>
+              <button 
+                className={leftArrowDisabled ? "invisible" : "rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2"}
+                onClick={() => setActiveQuestion(activeQuestion - 1)}
+              >
+                <ArrowLeft /> Prev
+              </button>
+            </Toolbar.Button>
 
-                handleNextClick(attemptQuestions[activeQuestion].id, attemptQuestions[activeQuestion].submittedAnswerId)
-              }}
-            >
-              {activeQuestion+1 === attemptQuestions.length-1 ? topic.topicType == "TEST" ? "Submit Test" : "View Results" : <div className="flex gap-2 items-center">Next <ArrowRight /></div>}
-            </button>
-          </div>
+            {/* NEXT / SUBMIT BUTTON */}
+            <Toolbar.Button asChild>
+              <button 
+                className="rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 flex items-center gap-2"
+                onClick={handleGoToNext}
+              >
+                {activeQuestion + 1 === attemptQuestions.length - 1 ? (
+                  topic.topicType === "TEST" ? "Submit Test" : "View Results"
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    Next <ArrowRight />
+                  </div>
+                )}
+              </button>
+            </Toolbar.Button>
+          </Toolbar.Root>
         </div>
         }
       </div>

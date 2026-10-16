@@ -15,5 +15,5 @@ export default async function EditTopicPage({params}: EditTopicPageProps){
   const questions = topic.questions;
   topic.questions = undefined
 
-  return <TopicEditor topic = {topic} questions = {questions || []}/>
+  return <TopicEditor topic = {topic || {}} questions = {questions || []}/>
 }

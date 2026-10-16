@@ -7,6 +7,7 @@ export default async function Attempts({searchParams}: {searchParams: Promise<{t
   await preAuthorize("STUDENT")
   
   const {topicId} = await searchParams;
+  
   if(!topicId?.trim()){
     redirect("/student-dashboard")
   }

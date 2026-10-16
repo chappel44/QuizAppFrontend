@@ -30,7 +30,7 @@ export async function getTopic(topicId: string): Promise<Response> {
   }
 
   const body = await res.json();
-  console.log("BODY DATA", body.data)
+  
   return {success: true, data: {topic: body.data}};
 }
 
@@ -53,7 +53,7 @@ export async function updateTopic(topic: Topic, questions: Question[]): Promise<
     ...question,
     id: question.id?.startsWith("tempQuestionId-") ? null : question.id,
     isActive: question.active,
-    answers: question.answers.map((answer) => (console.log("answers:", answer), {
+    answers: question.answers.map((answer) => ({
       ...answer,
       id: answer.id?.startsWith("tempAnswerId-") ? null : answer.id,
       isActive: answer.active,
@@ -77,12 +77,13 @@ export async function updateTopic(topic: Topic, questions: Question[]): Promise<
     if (!res.ok) {
       throw new Error("Failed to fetch attempts"); 
     }
+
     const topicId = await res.text()
 
     redirect(`/admin-dashboard/topic/${topicId}/edit?created=${true}`)
   }
   //Update topic when id present
-  else{
+  else {
     const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/topics?topicId=${topic.id}`, { 
       method: 'PATCH',
       headers: 
@@ -98,9 +99,8 @@ export async function updateTopic(topic: Topic, questions: Question[]): Promise<
       throw new Error("Failed to fetch attempts"); 
     }
 
-    const body = await res.json();
-
-    return {success: true, data: {topic: body.data}};
+    // const body = await res.json();
+    return {success: true, data: null};
   }
 }
 

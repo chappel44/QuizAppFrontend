@@ -72,6 +72,18 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
             <p className="font-semibold">{attempts.length}</p>
           </div>
         </div>
+                
+        <div className="flex justify-center mt-5">
+          <button
+            type="button"
+            className="rounded bg-blue-500 px-5 py-2 font-medium text-white hover:bg-blue-600"
+            onClick={handleCreateAttempt}
+          >
+            Start New Attempt
+          </button>
+        </div>
+
+        <div className="mb-5 border-b border-blue-200 pt-5" />
 
         <h2 className="mt-6 mb-3 text-sm font-semibold uppercase tracking-wide text-gray-700">
           Attempts
@@ -84,7 +96,7 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
             :
             <>
               {attempts.map((attempt, index) => (
-                <Card justify="between" direction="row">
+                <Card justify="between" direction="row" key={attempt.id + index}>
                   <div className="flex flex-1 items-center gap-3">
                     <div className="rounded bg-blue-500 px-3 py-2 text-sm font-semibold text-white">
                       Attempt #{index + 1}
@@ -112,16 +124,6 @@ export default function AttemptsLayout({attempts, topic}: AttemptLayoutProps) {
               ))}
             </>
           }
-        </div>
-
-        <div className="mt-6 flex justify-center border-t border-blue-200 pt-5">
-          <button
-            type="button"
-            className="rounded bg-blue-500 px-5 py-2 font-medium text-white hover:bg-blue-600"
-            onClick={handleCreateAttempt}
-          >
-            Start New Attempt
-          </button>
         </div>
       </SectionCard>
     </div>

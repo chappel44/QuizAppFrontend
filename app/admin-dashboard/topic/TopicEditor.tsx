@@ -260,9 +260,9 @@ export default function TopicEditor({topic: initialTopic, questions: initialQues
             />
           </div>
           <div className="space-y-2 md:space-y-6">
-            <Input value={question.question} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
-            <Input value={question.points.toString()} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
-            <Input value={question.imageUrl} name={`imageUrl ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Image Url" />
+            <Input value={question.question || ""} name = {`question ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Question" />
+            <Input value={question.points.toString() || "1"} name={`points ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Points" />
+            <Input value={question.imageUrl || ""} name={`imageUrl ${questionIndex}`} handleInputChange={(e) => handleQuestionChange(e)} label="Image Url" />
             <div className="flex items-center justify-start">
               <label
                 id="active"

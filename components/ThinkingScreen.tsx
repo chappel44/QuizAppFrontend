@@ -62,9 +62,9 @@ export function ThinkingScreen({ title = "Claude is thinking" }: { title?: strin
         </p>
 
         {/* Indeterminate progress bar */}
-        <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+        {/* <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
           <div className="h-full w-1/3 animate-slide rounded-full bg-blue-500 motion-reduce:animate-none" />
-        </div>
+        </div> */}
       </div>
     </div>
   )

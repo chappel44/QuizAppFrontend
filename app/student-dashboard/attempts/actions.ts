@@ -31,7 +31,6 @@ export async function getAttemptHistory(topicId: string): Promise<AttemptResult>
   }
 
   const body = await res.json();
-
   return { attempts: body.data.attempts, topic: body.data.topic };
 }
 
@@ -39,7 +38,7 @@ export async function getAttempt(attemptId: string) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value; 
   if (!token) {
-     redirect("/"); 
+    redirect("/"); 
   } 
   const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/student/attempt?attemptId=${attemptId}`, { 
     headers: 
@@ -102,9 +101,7 @@ export async function submitAnswer(answerId: string | null, attemptQuestionId: s
       method: "PATCH",
     },
   );
-  console.log("RES SUBMIT ANSWER:", res)
   const body = await res.json()
-  console.log("BODY SUBMIT ANSWER:", body)
   return body
 }
 
@@ -112,7 +109,7 @@ export async function createAttempt(topicId: string) {
   const cookieStore = await cookies(); 
   const token = cookieStore.get("token")?.value; 
   if (!token) {
-     redirect("/"); 
+    redirect("/"); 
   }
   const res = await fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/student/attempt?topicId=${topicId}`, { 
     headers: 

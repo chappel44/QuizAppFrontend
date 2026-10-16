@@ -10,6 +10,7 @@ import { Topic } from "@/app/student-dashboard/types";
 import { generateTempAnswerId, generateTempQuestionId } from "@/lib/tempId";
 import { ThinkingSpark } from "./ThinkingSpark";
 import { ThinkingScreen } from "./ThinkingScreen";
+import { toast } from "sonner";
 
 interface GenerateQuizProps {
   setQuestions: Dispatch<SetStateAction<Question[]>>;
@@ -19,7 +20,7 @@ interface GenerateQuizProps {
 export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps) {
   const [file, setFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState("");
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   async function handleGenerate() {
     let documentText: string | undefined;
@@ -44,8 +45,11 @@ export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps
     setLoading(false)
 
     if (!res.ok) {
+      toast.error("Error generating quiz")
       throw new Error("Failed to generate quiz");
     }
+
+    toast.success("Quiz Generated")
 
     const topic = await res.json();
 
@@ -71,8 +75,6 @@ export default function GenerateQuiz({setQuestions, setTopic}: GenerateQuizProps
         }))
       }))
     )
-
-    console.log(topic);
   }
 
   return (
